@@ -3,11 +3,13 @@ from PyQt6.QtWidgets import (
     QLineEdit, QPushButton, QTableWidget,
     QTableWidgetItem
 )
+import json
 
 class tabThermal(QWidget):
-    def __init__(self):
+    def __init__(self, cache):
         super().__init__()
 
+        ### input parameter fields
         self.inArea = QLineEdit()
         self.inThickness = QLineEdit()
         self.inThermConduct = QLineEdit()
@@ -16,20 +18,27 @@ class tabThermal(QWidget):
         self.inThickness.setPlaceholderText("Thickness [mm]")
         self.inThermConduct.setPlaceholderText("Thermal Conductivity [W/mK]")
 
+        inputLayout = QHBoxLayout()
+        inputLayout.addWidget(self.inArea)
+        inputLayout.addWidget(self.inThickness)
+        inputLayout.addWidget(self.inThermConduct)
+
+        ### add layer button
+        self.buttonAddRow = QPushButton("Add Layer")
+        self.buttonAddRow.clicked.connect(self.addRow)
+
+        ### layer table
         self.table = QTableWidget(0,3)
         self.table.setHorizontalHeaderLabels(["Area [mm]", "Thickness [mm]", "Thermal Conductivity [W/mK]"])
 
-        self.add_button = QPushButton("Add Layer")
-        self.add_button.clicked.connect(self.addRow)
+        ### save button
+        self.buttonSaveLayout = QPushButton("Save Layout")
+        self.buttonSaveLayout.clicked.connect(self.saveLayout)
 
-        form_layout = QHBoxLayout()
-        form_layout.addWidget(self.inArea)
-        form_layout.addWidget(self.inThickness)
-        form_layout.addWidget(self.inThermConduct)
-
+        ### assembly
         layout = QVBoxLayout()
-        layout.addLayout(form_layout)
-        layout.addWidget(self.add_button)
+        layout.addLayout(inputLayout)
+        layout.addWidget(self.buttonAddRow)
         layout.addWidget(self.table)
 
         self.setLayout(layout)
@@ -40,7 +49,7 @@ class tabThermal(QWidget):
         thermConduct = self.inThermConduct.text()
         for x in [area, thickness, thermConduct]:
             try:
-                x = float(x)
+                float(x)
             except:
                 return
         row = self.table.rowCount()
@@ -52,3 +61,7 @@ class tabThermal(QWidget):
         self.inArea.clear()
         self.inThickness.clear()
         self.inThermConduct.clear()
+
+    def saveLayout():
+        with open('cache.json', 'w') as file:
+            pass
