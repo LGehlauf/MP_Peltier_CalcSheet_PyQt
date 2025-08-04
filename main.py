@@ -1,39 +1,28 @@
 import sys
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QTableView, QVBoxLayout, QWidget
-)
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
+# from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget
+# from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from tabThermal import tabThermal
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        cache = readJson()
         self.setWindowTitle("MyApp")
-        self.setFixedSize(QSize(400, 300))
+        # self.setFixedSize(QSize(400, 300))
 
-        self.model = QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(["Name", "Alter", "Stadt"])
+        tabs = QTabWidget()
+        tabs.addTab(tabThermal(), "Thermal Input")
 
-        self.view = QTableView()
-        self.view.setModel(self.model)
+        self.setCentralWidget(tabs)
 
-        self.button = QPushButton("Zeile hinzufügen")
-        self.button.clicked.connect(self.add_row)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.view)
-        layout.addWidget(self.button)
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-    def add_row(self):
-        data = ["Max", "30", "Berlin"]
-        items = [QStandardItem(field) for field in data]
-        self.model.appendRow(items)
-
-
+    def readJson():
+        with open('cache.json', 'r') as file:
+            try:
+                return(json.load(file))
+            except:
+                return(dict())
+            
 
 app = QApplication(sys.argv)
 window = MainWindow()
