@@ -2,16 +2,18 @@ import sys
 # from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QComboBox, QVBoxLayout, 
-    QWidget, QHBoxLayout, QLabel
+    QWidget, QHBoxLayout, QLabel, QPushButton
 )
 # from PyQt6.QtGui import QStandardItemModel, QStandardItem
-from tabThermal import tabThermal
+from tabThermal import TabThermal
 import json
+import tempfile
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        cache = readCache()
+        self.cache = self.readCache()
         self.setWindowTitle("MyApp")
         # self.setFixedSize(QSize(400, 300))
 
@@ -20,28 +22,49 @@ class MainWindow(QMainWindow):
         mainLayout = QVBoxLayout(centralWidget)
 
         ### layout choice
+        layoutChoice = QHBoxLayout()
         ### layout choice drop down menu
         self.layoutChoiceDropdown = QComboBox()
-        for layout in cache['layouts']:
+        for layout in self.cache['layouts']:
             self.layoutChoiceDropdown.addItem(layout['name'])
-        layoutChoice = QHBoxLayout()
+        ### save button
+        self.buttonSaveLayout = QPushButton("Save Layout")
+        self.buttonSaveLayout.clicked.connect(self.saveCache)
+        ### label + assembly
         layoutChoice.addWidget(QLabel("layout"))
         layoutChoice.addWidget(self.layoutChoiceDropdown)
+        layoutChoice.addWidget(self.buttonSaveLayout)
 
         ### different tabs
         tabs = QTabWidget()
-        tabs.addTab(tabThermal(cache), "Thermal Input")
+        tabThermal = TabThermal(self.cache)
+        tabs.addTab(tabThermal, "Thermal Input")
+        self.layoutChoiceDropdown.activated.connect(tabThermal.setThermalTable)
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
         # self.setCentralWidget(self.layoutChoice)
 
-def readCache():
-    with open('cache.json', 'r') as file:
+    def readCache(self):
+        with open('cache.json', 'r') as file:
+            try:
+                return(json.load(file))
+            except:
+                return(dict())
+
+    def saveCache(self):
         try:
-            return(json.load(file))
-        except:
-            return(dict())
+            dirName = os.path.dirname(os.path.abspath('cache.json'))
+            with tempfile.NamedTemporaryFile('w', dir=dirName, delete=False) as file:
+                json.dump(self.cache, file, indent=4)
+
+            # so far no exceptions -> writing was successful
+            os.replace(file.name, 'cache.json')
+
+        except Exception as e:
+            print(f"saving did not work: {e}")
+
+    
 
 app = QApplication(sys.argv)
 window = MainWindow()

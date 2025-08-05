@@ -5,20 +5,24 @@ from PyQt6.QtWidgets import (
 )
 import json
 
-class tabThermal(QWidget):
+class TabThermal(QWidget):
     def __init__(self, cache):
         super().__init__()
+        self.cache = cache
 
         ### input parameter fields
+        self.inMaterial = QLineEdit()
         self.inArea = QLineEdit()
         self.inThickness = QLineEdit()
         self.inThermConduct = QLineEdit()
 
-        self.inArea.setPlaceholderText("Area [mm]")
+        self.inMaterial.setPlaceholderText("Material")
+        self.inArea.setPlaceholderText("Area [mm²]")
         self.inThickness.setPlaceholderText("Thickness [mm]")
         self.inThermConduct.setPlaceholderText("Thermal Conductivity [W/mK]")
 
         inputLayout = QHBoxLayout()
+        inputLayout.addWidget(self.inMaterial)
         inputLayout.addWidget(self.inArea)
         inputLayout.addWidget(self.inThickness)
         inputLayout.addWidget(self.inThermConduct)
@@ -28,12 +32,9 @@ class tabThermal(QWidget):
         self.buttonAddRow.clicked.connect(self.addRow)
 
         ### layer table
-        self.table = QTableWidget(0,3)
-        self.table.setHorizontalHeaderLabels(["Area [mm]", "Thickness [mm]", "Thermal Conductivity [W/mK]"])
-
-        ### save button
-        self.buttonSaveLayout = QPushButton("Save Layout")
-        self.buttonSaveLayout.clicked.connect(self.saveLayout)
+        self.table = QTableWidget(0,4)
+        self.table.setHorizontalHeaderLabels(["Material", "Area [mm²]", "Thickness [mm]", "Thermal Conductivity [W/mK]"])
+        self.setThermalTable(0)
 
         ### assembly
         layout = QVBoxLayout()
@@ -62,6 +63,12 @@ class tabThermal(QWidget):
         self.inThickness.clear()
         self.inThermConduct.clear()
 
-    def saveLayout():
-        with open('cache.json', 'w') as file:
-            pass
+    def setThermalTable(self, layoutIndex):
+        self.table.clearContents()
+        self.table.setRowCount(0)
+        for layer in self.cache['layouts'][layoutIndex]['thermalStructure']:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            for i, item in enumerate(layer.values()):
+                self.table.setItem(row, i, QTableWidgetItem(str(item)))
+

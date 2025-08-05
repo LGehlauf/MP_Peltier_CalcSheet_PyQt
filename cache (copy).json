@@ -1,0 +1,50 @@
+{
+    "layouts": [
+        {
+            "name": "default",
+            "thermalStructure": [
+                {
+                    "material": "CU",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                },
+                {
+                    "material": "CU",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                },
+                {
+                    "material": "CU",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                }
+            ]
+        },
+        {
+            "name": "custom1",
+            "thermalStructure": [
+                {
+                    "material": "AL",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                },
+                {
+                    "material": "ALO",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                },
+                {
+                    "material": "ALO",
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
+                }
+            ]
+        }
+    ]
+}
