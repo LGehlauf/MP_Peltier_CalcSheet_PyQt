@@ -4,22 +4,16 @@
             "name": "default",
             "thermalStructure": [
                 {
-                    "area": 1.1,
                     "material": "CU",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
                 },
                 {
-                    "area": 1.1,
                     "material": "CU",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
-                },
-                {
                     "area": 1.1,
-                    "material": "CU",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
                 }
             ]
         },
@@ -27,22 +21,22 @@
             "name": "custom1",
             "thermalStructure": [
                 {
-                    "area": 1.1,
                     "material": "AL",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
                 },
                 {
-                    "area": 1.1,
                     "material": "ALO",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
                 },
                 {
-                    "area": 1.1,
                     "material": "ALO",
-                    "thermalConductivity": 1.3,
-                    "thickness": 1.4
+                    "area": 1.1,
+                    "thickness": 1.4,
+                    "thermalConductivity": 1.3
                 }
             ]
         }

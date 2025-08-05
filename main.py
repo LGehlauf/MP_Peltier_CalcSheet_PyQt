@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         for layout in self.cache['layouts']:
             self.layoutChoiceDropdown.addItem(layout['name'])
         ### save button
-        self.buttonSaveLayout = QPushButton("Save Layout")
+        self.buttonSaveLayout = QPushButton("Save All Layouts")
         self.buttonSaveLayout.clicked.connect(self.saveCache)
         ### label + assembly
         layoutChoice.addWidget(QLabel("layout"))
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         tabThermal = TabThermal(self.cache)
         tabs.addTab(tabThermal, "Thermal Input")
-        self.layoutChoiceDropdown.activated.connect(tabThermal.setThermalTable)
+        self.layoutChoiceDropdown.activated.connect(tabThermal.setThermalTable) # dropdown menu tells current layout index
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
