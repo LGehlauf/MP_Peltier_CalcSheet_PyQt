@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
+from PyQt6.QtSvgWidgets import QSvgWidget
+import cairo
 
 class TabThermal(QWidget):
     def __init__(self, cache):
@@ -44,12 +46,22 @@ class TabThermal(QWidget):
         self.table.customContextMenuRequested.connect(self.rightClickOnTable)
         self.setThermalTable(layoutIndex=0)
 
-        ### assembly
-        layout = QVBoxLayout()
-        layout.addLayout(inputLayout)
-        layout.addWidget(self.table)
+        ### layer svg
+        self.drawLayersSvg()
+        self.svg = QSvgWidget("assets/thermal.svg")
+        self.svg.setFixedSize(600, 100)
 
-        self.setLayout(layout)
+        ### layer assembly
+        layerLayout = QHBoxLayout()
+        layerLayout.addWidget(self.table)
+        layerLayout.addWidget(self.svg)
+
+        ### assembly
+        assemblyLayout = QVBoxLayout()
+        assemblyLayout.addLayout(inputLayout)
+        assemblyLayout.addLayout(layerLayout)
+
+        self.setLayout(assemblyLayout)
 
     def addRow(self):
         material = self.inMaterial.text()
@@ -104,8 +116,18 @@ class TabThermal(QWidget):
             menu.addAction(deleteRowAction)
             menu.exec(self.table.viewport().mapToGlobal(pos))
 
-
     def deleteRow(self, rowNum):
         self.cache['layouts'][self.currentLayoutIndex]['thermalStructure'].pop(rowNum)
         self.table.removeRow(rowNum)
+
+    def drawLayersSvg(self):
+        layout = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
+        totalThickness = 20 + sum((5 * layer['thickness'] for layer in layout))
+        with cairo.SVGSurface("assets/thermal.svg", totalThickness, 50) as surface:
+            context = cairo.Context(surface)
+            context.set_line_width(0.04)
+            context.set_source_rgba(0.4, 1, 0.4, 1)
+            for layer in layout:
+                context.rectangle(10, 10, 40, layer['thickness']) # TODO: move next rectangle, dynamically changing painting
+                context.stroke()
 
