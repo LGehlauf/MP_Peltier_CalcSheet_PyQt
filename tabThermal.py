@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QTableWidget,
-    QTableWidgetItem, QMenu, QLabel
+    QTableWidgetItem, QMenu, QLabel, QHeaderView
 )
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
@@ -13,42 +13,48 @@ class TabThermal(QWidget):
         super().__init__()
         self.cache = cache
         self.currentLayoutIndex = 0
-        self.resThermConduct = 0
+        self.resThermConductCoeff = 0
+        self.resThermResistance = 0
 
         ### input parameter fields
         self.inMaterial = QLineEdit()
         self.inArea = QLineEdit()
         self.inThickness = QLineEdit()
-        self.inThermConduct = QLineEdit()
+        self.inThermConductCoef = QLineEdit()
         self.inRowNum = QLineEdit()
 
         self.inMaterial.setPlaceholderText("Material")
         self.inArea.setPlaceholderText("Area [mm²]")
         self.inThickness.setPlaceholderText("Thickness [mm]")
-        self.inThermConduct.setPlaceholderText("Thermal Conductivity [W/mK]")
+        self.inThermConductCoef.setPlaceholderText("Thermal Conductivity Coefficient [W/mK]")
         self.inRowNum.setPlaceholderText("Insert After Row")
 
         inputLayout = QHBoxLayout()
         inputLayout.addWidget(self.inMaterial)
         inputLayout.addWidget(self.inArea)
         inputLayout.addWidget(self.inThickness)
-        inputLayout.addWidget(self.inThermConduct)
+        inputLayout.addWidget(self.inThermConductCoef)
         inputLayout.addWidget(self.inRowNum)
 
         ### add layer button
-        self.buttonAddRow = QPushButton("Add Layer")
-        self.buttonAddRow.clicked.connect(self.addRow)
-        inputLayout.addWidget(self.buttonAddRow)
+        buttonAddRow = QPushButton("Add Layer")
+        buttonAddRow.clicked.connect(self.addRow)
+        inputLayout.addWidget(buttonAddRow)
 
         ### layer assembly
         layerLayout = QHBoxLayout()
 
         ### layer table
         self.table = QTableWidget(0,4)
-        self.table.setHorizontalHeaderLabels(["Material", "Area [mm²]", "Thickness [mm]", "Thermal Conductivity [W/mK]"])
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setHorizontalHeaderLabels(["Material", "Area [mm²]", "Thickness [mm]", "Therm. Conduct. Coeff. [W/mK]"])
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.rightClickOnTable)
-        self.setThermalTable(layoutIndex=0)
+        self.setTable(layoutIndex=0)
 
         ### layer svg
         self.svg = QSvgWidget("assets/thermal.svg")
@@ -78,7 +84,7 @@ class TabThermal(QWidget):
         material = self.inMaterial.text()
         area = self.inArea.text()
         thickness = self.inThickness.text()
-        thermConduct = self.inThermConduct.text()
+        thermConduct = self.inThermConductCoef.text()
         rowNum = self.inRowNum.text()
         for x in [area, thickness, thermConduct]:
             try:
@@ -103,13 +109,13 @@ class TabThermal(QWidget):
         self.inMaterial.clear()
         self.inArea.clear()
         self.inThickness.clear()
-        self.inThermConduct.clear()
+        self.inThermConductCoef.clear()
         self.inRowNum.clear()
 
         self.drawLayersSvg(self.currentLayoutIndex)
         self.setOutput(self.currentLayoutIndex)
 
-    def setThermalTable(self, layoutIndex):
+    def setTable(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
         self.table.clearContents()
         self.table.setRowCount(0)
@@ -190,8 +196,8 @@ class TabThermal(QWidget):
         for layer in structure:
             self.resThermResistance += layer['thickness'] * 1000 / (layer['thermalConductivity'] * layer['area'] * 1000 * 1000)
 
-        self.resThermConduct = totalThickness * 1000 / (self.resThermResistance * maxArea * 1000 * 1000)   
+        self.resThermConductCoeff = totalThickness * 1000 / (self.resThermResistance * maxArea * 1000 * 1000)   
         self.outputRes.setText(f"Resulting Thermal Resistance: {self.resThermResistance:e} K/W")
-        self.outputConduct.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConduct:e} W/mK")
+        self.outputConduct.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConductCoeff:e} W/mK")
 
 

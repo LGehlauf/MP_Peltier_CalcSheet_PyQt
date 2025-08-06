@@ -33,7 +33,28 @@
                     "thickness": 0.7,
                     "thermalConductivity": 25 
                 }
-            ]
+            ],
+            "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                }
+            ],
+            "numberOfElectricalRepetitions": 252
         },
         {
             "name": "default",
