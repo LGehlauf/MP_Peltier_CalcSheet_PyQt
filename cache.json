@@ -60,7 +60,8 @@
                     "specElResistance": 1
                 }
             ],
-            "numberOfElectricalRepetitions": 20
+            "numberOfElectricalRepetitions": 20,
+            "combinedSeebeckCoefficient": 480
         },
         {
             "name": "default",

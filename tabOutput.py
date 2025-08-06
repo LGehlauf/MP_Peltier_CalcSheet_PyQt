@@ -7,6 +7,28 @@ from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
 from PyQt6.QtSvgWidgets import QSvgWidget
 import cairo
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import numpy as np
+
+
+class PlotCanvas(FigureCanvas):
+    def __init__(self, parent=None):
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        super().__init__(self.fig)
+        self.setParent(parent)
+        self.plot()
+
+    def plot(self):
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+        self.ax.plot(x, y, label="sin(x)")
+        self.ax.set_title("X-Y Diagramm")
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
+        self.ax.legend()
+        self.draw()
 
 class TabOutput(QWidget):
     def __init__(self, cache):
@@ -14,16 +36,29 @@ class TabOutput(QWidget):
         self.cache = cache
         self.currentLayoutIndex = 0
 
+        ### svg
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         self.drawSankeySvg(self.currentLayoutIndex)
 
+        ### mpl plot
+        self.mplPlot = PlotCanvas(self)
+
         assemblyLayout = QHBoxLayout()
+        assemblyLayout.addWidget(self.mplPlot)
         assemblyLayout.addWidget(self.svg)
         self.setLayout(assemblyLayout)
+    
+    def calcHeatflux(self, layoutIndex):
+        # seebeck coefficient: 480 µV/K  
+        # -> peltier coefficient: 140.7 mV
+        self.currentLayoutIndex = layoutIndex
+        layout = self.cache['layouts'][layoutIndex]
+        resPeltierCoefficient = 0.48 * layout['numberOfElectricalRepetitions'] # mV
+        # TODO: build W/U diagram, sankeys
 
 
-    def drawSankeySvg(self, layoutIndex): # TODO: Research peltier coefficient find out if P_el = P_R + P_P.E.
+    def drawSankeySvg(self, layoutIndex): # TODO: redraw when cache changes
         self.currentLayoutIndex = layoutIndex
         layoutName = self.cache['layouts'][layoutIndex]['name']
         svgWidth, svgHeight = 500, 500

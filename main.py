@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         self.layoutChoiceDropdown.activated.connect(tabElectrical.setTable) 
         self.layoutChoiceDropdown.activated.connect(tabElectrical.displayNumReps) 
         self.layoutChoiceDropdown.activated.connect(tabElectrical.setOutput) 
+        self.layoutChoiceDropdown.activated.connect(tabOutput.drawSankeySvg) 
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
