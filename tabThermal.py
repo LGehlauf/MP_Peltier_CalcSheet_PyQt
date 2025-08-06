@@ -39,6 +39,9 @@ class TabThermal(QWidget):
         self.buttonAddRow.clicked.connect(self.addRow)
         inputLayout.addWidget(self.buttonAddRow)
 
+        ### layer assembly
+        self.layerLayout = QHBoxLayout()
+
         ### layer table
         self.table = QTableWidget(0,4)
         self.table.setHorizontalHeaderLabels(["Material", "Area [mm²]", "Thickness [mm]", "Thermal Conductivity [W/mK]"])
@@ -47,19 +50,17 @@ class TabThermal(QWidget):
         self.setThermalTable(layoutIndex=0)
 
         ### layer svg
-        self.drawLayersSvg()
         self.svg = QSvgWidget("assets/thermal.svg")
-        self.svg.setFixedSize(600, 100)
+        self.drawLayersSvg(self.currentLayoutIndex)
 
         ### layer assembly
-        layerLayout = QHBoxLayout()
-        layerLayout.addWidget(self.table)
-        layerLayout.addWidget(self.svg)
+        self.layerLayout.addWidget(self.table)
+        self.layerLayout.addWidget(self.svg)
 
         ### assembly
         assemblyLayout = QVBoxLayout()
         assemblyLayout.addLayout(inputLayout)
-        assemblyLayout.addLayout(layerLayout)
+        assemblyLayout.addLayout(self.layerLayout)
 
         self.setLayout(assemblyLayout)
 
@@ -95,6 +96,8 @@ class TabThermal(QWidget):
         self.inThermConduct.clear()
         self.inRowNum.clear()
 
+        self.drawLayersSvg(self.currentLayoutIndex)
+
     def setThermalTable(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
         self.table.clearContents()
@@ -119,15 +122,40 @@ class TabThermal(QWidget):
     def deleteRow(self, rowNum):
         self.cache['layouts'][self.currentLayoutIndex]['thermalStructure'].pop(rowNum)
         self.table.removeRow(rowNum)
+        self.drawLayersSvg(self.currentLayoutIndex)
 
-    def drawLayersSvg(self):
+    def drawLayersSvg(self, layoutIndex):
+        totalWidth = 100
+        # height should corresponding to the number of table rows
+        # svgHeight = 50 * len(self.cache['layouts'][self.currentLayoutIndex]['thermalStructure'])
+        svgHeight = 100
+        self.svg.setFixedSize(totalWidth, svgHeight)
+        self.currentLayoutIndex = layoutIndex
+        colors = [
+            (1.0, 0.701, 0.729),   # Pastellrosa
+            (1.0, 0.874, 0.729),   # Pastellorange
+            (1.0, 1.0, 0.729),     # Pastellgelb
+            (0.729, 1.0, 0.788),   # Pastellgrün
+            (0.729, 0.882, 1.0),   # Pastellblau
+            (0.855, 0.729, 1.0),   # Pastelllila
+            (1.0, 0.729, 0.945),   # Pastellmagenta
+            (0.729, 1.0, 1.0),     # Pastelltürkis
+            (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
+            (1.0, 0.8, 0.898),     # Zartes Rosa
+        ]
         layout = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
-        totalThickness = 20 + sum((5 * layer['thickness'] for layer in layout))
-        with cairo.SVGSurface("assets/thermal.svg", totalThickness, 50) as surface:
+        totalHeight = sum((5 * layer['thickness'] for layer in layout))
+        # canvas should be square
+        with cairo.SVGSurface("assets/thermal.svg", totalHeight, totalHeight) as surface:
             context = cairo.Context(surface)
-            context.set_line_width(0.04)
-            context.set_source_rgba(0.4, 1, 0.4, 1)
-            for layer in layout:
-                context.rectangle(10, 10, 40, layer['thickness']) # TODO: move next rectangle, dynamically changing painting
-                context.stroke()
+            cumuThickness = 0
+            for i, layer in enumerate(layout):
+                r = colors[i%len(colors)][0]
+                g = colors[i%len(colors)][1]
+                b = colors[i%len(colors)][2]
+                context.set_source_rgba(r, g, b, 1)
+                context.rectangle(2, 2 + cumuThickness, totalWidth, 5 * layer['thickness'])
+                cumuThickness += 5 * layer['thickness']
+                context.fill()
+        self.svg.load("assets/thermal.svg")
 

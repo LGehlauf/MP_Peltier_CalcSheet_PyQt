@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         tabThermal = TabThermal(self.cache)
         tabs.addTab(tabThermal, "Thermal Input")
         self.layoutChoiceDropdown.activated.connect(tabThermal.setThermalTable) # dropdown menu tells current layout index
+        self.layoutChoiceDropdown.activated.connect(tabThermal.drawLayersSvg) 
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
