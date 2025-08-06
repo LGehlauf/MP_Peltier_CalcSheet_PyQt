@@ -66,10 +66,10 @@ class TabThermal(QWidget):
 
         ### output layout 
         outputLayout = QHBoxLayout()
-        self.outputRes = QLabel(alignment=Qt.AlignmentFlag.AlignLeft)
-        self.outputConduct = QLabel(alignment=Qt.AlignmentFlag.AlignRight)
-        outputLayout.addWidget(self.outputRes)
-        outputLayout.addWidget(self.outputConduct)
+        self.outputResLabel = QLabel(alignment=Qt.AlignmentFlag.AlignLeft)
+        self.outputConductLabel = QLabel(alignment=Qt.AlignmentFlag.AlignRight)
+        outputLayout.addWidget(self.outputResLabel)
+        outputLayout.addWidget(self.outputConductLabel)
         self.setOutput(self.currentLayoutIndex)
 
         ### assembly
@@ -189,7 +189,7 @@ class TabThermal(QWidget):
         self.svg.load("assets/thermal.svg")
 
     def setOutput(self, layoutIndex):
-        structure = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
+        structure = self.cache['layouts'][layoutIndex]['thermalStructure']
         totalThickness = sum((layer['thickness'] for layer in structure))
         maxArea = max((layer['area'] for layer in structure))
         self.resThermResistance = 0
@@ -197,7 +197,5 @@ class TabThermal(QWidget):
             self.resThermResistance += layer['thickness'] * 1000 / (layer['thermalConductivity'] * layer['area'] * 1000 * 1000)
 
         self.resThermConductCoeff = totalThickness * 1000 / (self.resThermResistance * maxArea * 1000 * 1000)   
-        self.outputRes.setText(f"Resulting Thermal Resistance: {self.resThermResistance:e} K/W")
-        self.outputConduct.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConductCoeff:e} W/mK")
-
-
+        self.outputResLabel.setText(f"Resulting Thermal Resistance: {self.resThermResistance:e} K/W")
+        self.outputConductLabel.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConductCoeff:e} W/mK")
