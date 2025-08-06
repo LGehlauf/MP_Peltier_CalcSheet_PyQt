@@ -1,6 +1,41 @@
 {
     "layouts": [
         {
+            "name": "tec-12706",
+            "thermalStructure": [
+                {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25 
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401 
+                },
+                {
+                    "material": "BiTe",
+                    "area": 393.75,
+                    "thickness": 1.25,
+                    "thermalConductivity": 1.2
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401 
+                },
+                {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25 
+                }
+            ]
+        },
+        {
             "name": "default",
             "thermalStructure": [
                 {

@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QComboBox, QVBoxLayout, 
     QWidget, QHBoxLayout, QLabel, QPushButton
 )
+from PyQt6.QtCore import Qt
 # from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from tabThermal import TabThermal
 import json
@@ -31,7 +32,7 @@ class MainWindow(QMainWindow):
         self.buttonSaveLayout = QPushButton("Save All Layouts")
         self.buttonSaveLayout.clicked.connect(self.saveCache)
         ### label + assembly
-        layoutChoice.addWidget(QLabel("layout"))
+        layoutChoice.addWidget(QLabel("Layout: ", alignment = Qt.AlignmentFlag.AlignCenter))
         layoutChoice.addWidget(self.layoutChoiceDropdown)
         layoutChoice.addWidget(self.buttonSaveLayout)
 
@@ -41,6 +42,7 @@ class MainWindow(QMainWindow):
         tabs.addTab(tabThermal, "Thermal Input")
         self.layoutChoiceDropdown.activated.connect(tabThermal.setThermalTable) # dropdown menu tells current layout index
         self.layoutChoiceDropdown.activated.connect(tabThermal.drawLayersSvg) 
+        self.layoutChoiceDropdown.activated.connect(tabThermal.setOutput) 
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
