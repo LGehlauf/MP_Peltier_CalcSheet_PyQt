@@ -57,7 +57,8 @@ class TabThermal(QWidget):
         self.setTable(layoutIndex=0)
 
         ### layer svg
-        self.svg = QSvgWidget("assets/thermal.svg")
+        layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
+        self.svg = QSvgWidget(f"assets/thermal_{layoutName}.svg")
         self.drawLayersSvg(self.currentLayoutIndex)
 
         ### layer assembly
@@ -142,7 +143,7 @@ class TabThermal(QWidget):
         self.drawLayersSvg(self.currentLayoutIndex)
         self.setOutput(self.currentLayoutIndex)
 
-    def drawLayersSvg(self, layoutIndex):
+    def drawLayersSvg(self, layoutIndex): 
         svgWidth = 250
         svgHeight = 250
         self.svg.setFixedSize(svgWidth, svgHeight)
@@ -157,12 +158,13 @@ class TabThermal(QWidget):
             (1.0, 0.729, 0.945),   # Pastellmagenta
             (0.729, 1.0, 1.0),     # Pastelltürkis
             (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
-            (1.0, 0.8, 0.898),     # Zartes Rosa
+            (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
         structure = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
         structureHeight = sum((layer['thickness'] for layer in structure))
         structureArea = max((layer['area'] for layer in structure))
-        with cairo.SVGSurface("assets/thermal.svg", svgWidth, svgHeight) as surface:
+        layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
+        with cairo.SVGSurface(f"assets/thermal_{layoutName}.svg", svgWidth, svgHeight) as surface:
             context = cairo.Context(surface)
             cumuThickness = 0
             for i, layer in enumerate(structure):
@@ -186,7 +188,7 @@ class TabThermal(QWidget):
                         x += (stripeWidth + gapWidth)
                 cumuThickness += height
                 context.fill()
-        self.svg.load("assets/thermal.svg")
+        self.svg.load(f"assets/thermal_{layoutName}.svg")
 
     def setOutput(self, layoutIndex):
         structure = self.cache['layouts'][layoutIndex]['thermalStructure']

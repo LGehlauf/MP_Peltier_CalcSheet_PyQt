@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt
 # from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from tabThermal import TabThermal
 from tabElectrical import TabElectrical
+from tabOutput import TabOutput
 import json
 import tempfile
 import os
@@ -40,8 +41,10 @@ class MainWindow(QMainWindow):
         ### different tabs
         tabs = QTabWidget()
         tabThermal = TabThermal(self.cache)
-        tabs.addTab(tabThermal, "Thermal Structure")
         tabElectrical = TabElectrical(self.cache)
+        tabOutput = TabOutput(self.cache)
+        tabs.addTab(tabOutput, "Output")
+        tabs.addTab(tabThermal, "Thermal Structure")
         tabs.addTab(tabElectrical, "Electrical Structure")
         self.layoutChoiceDropdown.activated.connect(tabThermal.setTable) # dropdown menu tells current layout index
         self.layoutChoiceDropdown.activated.connect(tabThermal.drawLayersSvg) 
