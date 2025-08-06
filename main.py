@@ -46,6 +46,9 @@ class MainWindow(QMainWindow):
         self.layoutChoiceDropdown.activated.connect(tabThermal.setTable) # dropdown menu tells current layout index
         self.layoutChoiceDropdown.activated.connect(tabThermal.drawLayersSvg) 
         self.layoutChoiceDropdown.activated.connect(tabThermal.setOutput) 
+        self.layoutChoiceDropdown.activated.connect(tabElectrical.setTable) 
+        self.layoutChoiceDropdown.activated.connect(tabElectrical.displayNumReps) 
+        self.layoutChoiceDropdown.activated.connect(tabElectrical.setOutput) 
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)

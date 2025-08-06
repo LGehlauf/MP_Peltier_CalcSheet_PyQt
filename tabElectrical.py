@@ -52,16 +52,22 @@ class TabElectrical(QWidget):
         ### input number of Repetitition Layout
         repLayout = QHBoxLayout()
         self.inNumReps = QLineEdit()
-        self.inNumReps.setText(str(cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions']))
+        self.displayNumReps(self.currentLayoutIndex)
+        self.inNumReps.textChanged.connect(self.saveNumReps)
         repLayout.addWidget(QLabel("Number of Repititions: "))
         repLayout.addWidget(self.inNumReps)
-        buttonSaveNumReps = QPushButton("Save")
-        buttonAddRow.clicked.connect(self.saveNumReps) 
+
+        ### output layout 
+        outputLayout = QHBoxLayout()
+        self.outputResLabel = QLabel(alignment=Qt.AlignmentFlag.AlignLeft)
+        outputLayout.addWidget(self.outputResLabel)
+        self.setOutput(self.currentLayoutIndex)
 
         assemblyLayout = QVBoxLayout()
         assemblyLayout.addLayout(inputLayout)
         assemblyLayout.addWidget(self.table)
         assemblyLayout.addLayout(repLayout)
+        assemblyLayout.addLayout(outputLayout)
 
         self.setLayout(assemblyLayout)
 
@@ -96,6 +102,8 @@ class TabElectrical(QWidget):
         self.inLength.clear()
         self.inSpecElResistance.clear()
         self.inRowNum.clear()
+        
+        self.setOutput(self.currentLayoutIndex)
 
     def setTable(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
@@ -121,10 +129,29 @@ class TabElectrical(QWidget):
     def deleteRow(self, rowNum):
         self.cache['layouts'][self.currentLayoutIndex]['electricalStructure'].pop(rowNum)
         self.table.removeRow(rowNum)
+        self.setOutput(self.currentLayoutIndex)
+
+    def displayNumReps(self, layoutIndex):
+        self.inNumReps.setText(str(self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']))
 
     def saveNumReps(self):
-        pass
+        numReps = self.inNumReps.text()
+        try: 
+            numReps = int(numReps)
+        except:
+            return
+        self.cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions'] = numReps
+        self.setOutput(self.currentLayoutIndex)
 
     def setOutput(self, layoutIndex):
-        structure = self.cache['layouts'][self.currentLayoutIndex]['electricalStructure']
+        structure = self.cache['layouts'][layoutIndex]['electricalStructure']
+
+        self.resElResistance = 0
+        for con in structure:
+            self.resElResistance += con['specElResistance'] * con['length'] * 1000 / (con['crossSection'] * 1000 * 1000)
+        self.resElResistance *= self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']
+        self.outputResLabel.setText(f"Resulting Electrical Resistance: {self.resElResistance:e} Ohm") 
+
+        
+
         

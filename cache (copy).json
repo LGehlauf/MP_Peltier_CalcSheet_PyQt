@@ -1,6 +1,62 @@
 {
     "layouts": [
         {
+            "name": "tec-12706",
+            "thermalStructure": [
+                {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401
+                },
+                {
+                    "material": "BiTe",
+                    "area": 393.75,
+                    "thickness": 1.25,
+                    "thermalConductivity": 1.2
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401
+                },
+                {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25
+                }
+            ],
+            "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                }
+            ],
+            "numberOfElectricalRepetitions": 370
+        },
+        {
             "name": "default",
             "thermalStructure": [
                 {
@@ -16,12 +72,39 @@
                     "thermalConductivity": 1.3
                 },
                 {
-                    "material": "CU",
-                    "area": 1.1,
-                    "thickness": 1.4,
-                    "thermalConductivity": 1.3
+                    "material": "1",
+                    "area": 1.0,
+                    "thickness": 6.0,
+                    "thermalConductivity": 2.0
+                },
+                {
+                    "material": "1",
+                    "area": 2.0,
+                    "thickness": 3.0,
+                    "thermalConductivity": 1.0
                 }
-            ]
+            ],
+            "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                }
+            ],
+            "numberOfElectricalRepetitions": 270
         },
         {
             "name": "custom1",
@@ -44,7 +127,28 @@
                     "thickness": 1.4,
                     "thermalConductivity": 1.3
                 }
-            ]
+            ],
+            "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 1.1,
+                    "length": 1,
+                    "specElResistance": 1
+                }
+            ],
+            "numberOfElectricalRepetitions": 27
         }
     ]
 }
