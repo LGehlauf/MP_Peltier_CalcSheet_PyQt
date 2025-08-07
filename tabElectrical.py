@@ -12,6 +12,11 @@ class TabElectrical(QWidget):
         self.cache = cache
         self.currentLayoutIndex = 0
 
+        self.init()
+        self.connecting()
+
+
+    def init(self):
         ### input new row fields
         self.inMaterial = QLineEdit()
         self.inCrossSection = QLineEdit()
@@ -25,57 +30,62 @@ class TabElectrical(QWidget):
         self.inSpecElResistance.setPlaceholderText("Spec. Elec. Resistance [Ohm*m]")
         self.inRowNum.setPlaceholderText("Insert After Row")
 
-        inputLayout = QHBoxLayout()
-        inputLayout.addWidget(self.inMaterial)
-        inputLayout.addWidget(self.inCrossSection)
-        inputLayout.addWidget(self.inLength)
-        inputLayout.addWidget(self.inSpecElResistance)
-        inputLayout.addWidget(self.inRowNum)
+        self.inputLayout = QHBoxLayout()
+        self.inputLayout.addWidget(self.inMaterial)
+        self.inputLayout.addWidget(self.inCrossSection)
+        self.inputLayout.addWidget(self.inLength)
+        self.inputLayout.addWidget(self.inSpecElResistance)
+        self.inputLayout.addWidget(self.inRowNum)
 
         ### add layer button
-        buttonAddRow = QPushButton("Add Conductor")
-        buttonAddRow.clicked.connect(self.addRow)
-        inputLayout.addWidget(buttonAddRow)
+        self.buttonAddRow = QPushButton("Add Conductor")
+        self.inputLayout.addWidget(self.buttonAddRow)
 
         ### layer table
         self.table = QTableWidget(0,4)
-        header = self.table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.header = self.table.horizontalHeader()
+        self.header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setHorizontalHeaderLabels(["Material", "Cross-Section [mm²]", "Length [mm]", "Spec. Elec. Resistance [Ohm*m]"])
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.table.customContextMenuRequested.connect(self.rightClickOnTable)
         self.setTable(layoutIndex=0)
 
         ### input number of Repetititions and Peltier Coeff Layout
-        repLayout = QHBoxLayout()
+        self.repLayout = QHBoxLayout()
         self.inNumReps = QLineEdit()
         self.displayNumReps(self.currentLayoutIndex)
-        self.inNumReps.textChanged.connect(self.saveNumReps)
 
         self.inSeebeckCoeff = QLineEdit()
         self.displaySeebeckCoeff(self.currentLayoutIndex)
-        self.inSeebeckCoeff.textChanged.connect(self.saveSeebeckCoeff)
-        repLayout.addWidget(QLabel("Number of Repititions: "))
-        repLayout.addWidget(self.inNumReps)
-        repLayout.addWidget(QLabel("Combined Seebeck Coefficient: (µV/K)"))
-        repLayout.addWidget(self.inSeebeckCoeff)
+
+        self.repLayout.addWidget(QLabel("Number of Repititions: "))
+        self.repLayout.addWidget(self.inNumReps)
+        self.repLayout.addWidget(QLabel("Combined Seebeck Coefficient: (µV/K)"))
+        self.repLayout.addWidget(self.inSeebeckCoeff)
 
         ### output layout 
-        outputLayout = QHBoxLayout()
+        self.outputLayout = QHBoxLayout()
         self.outputResLabel = QLabel(alignment=Qt.AlignmentFlag.AlignLeft)
-        outputLayout.addWidget(self.outputResLabel)
+        self.outputLayout.addWidget(self.outputResLabel)
         self.setOutput(self.currentLayoutIndex)
 
-        assemblyLayout = QVBoxLayout()
-        assemblyLayout.addLayout(inputLayout)
-        assemblyLayout.addWidget(self.table)
-        assemblyLayout.addLayout(repLayout)
-        assemblyLayout.addLayout(outputLayout)
+        ### assembly layout
+        self.assemblyLayout = QVBoxLayout()
+        self.assemblyLayout.addLayout(self.inputLayout)
+        self.assemblyLayout.addWidget(self.table)
+        self.assemblyLayout.addLayout(self.repLayout)
+        self.assemblyLayout.addLayout(self.outputLayout)
 
-        self.setLayout(assemblyLayout)
+        self.setLayout(self.assemblyLayout)
+
+    def connecting(self):
+        self.buttonAddRow.clicked.connect(self.addRow)
+        self.table.customContextMenuRequested.connect(self.rightClickOnTable)
+
+        self.inNumReps.textChanged.connect(self.saveNumReps)
+        self.inSeebeckCoeff.textChanged.connect(self.saveSeebeckCoeff)
 
     def addRow(self):
         material = self.inMaterial.text()
@@ -141,7 +151,6 @@ class TabElectrical(QWidget):
         self.inNumReps.setText(str(self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']))
 
     def saveNumReps(self):
-        print("saveNum")
         numReps = self.inNumReps.text()
         try: 
             numReps = int(numReps)
@@ -151,7 +160,7 @@ class TabElectrical(QWidget):
         self.setOutput(self.currentLayoutIndex)
 
     def displaySeebeckCoeff(self, layoutIndex):
-        self.inNumReps.setText(str(self.cache['layouts'][layoutIndex]['combinedSeebeckCoefficient']))
+        self.inSeebeckCoeff.setText(str(self.cache['layouts'][layoutIndex]['combinedSeebeckCoefficient']))
 
     def saveSeebeckCoeff(self):
         seebeckCoeff = self.inSeebeckCoeff.text()
