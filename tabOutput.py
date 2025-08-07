@@ -54,11 +54,11 @@ class TabOutput(QWidget):
         # -> peltier coefficient: 140.7 mV
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
-        resPeltierCoefficient = 0.48 * layout['numberOfElectricalRepetitions'] # mV
+        resPeltierCoefficient = layout['combinedSeebeckCoefficient'] * layout['numberOfElectricalRepetitions'] # mV
         # TODO: build W/U diagram, sankeys
 
 
-    def drawSankeySvg(self, layoutIndex): # TODO: redraw when cache changes
+    def drawSankeySvg(self, layoutIndex): 
         self.currentLayoutIndex = layoutIndex
         layoutName = self.cache['layouts'][layoutIndex]['name']
         svgWidth, svgHeight = 500, 500
@@ -69,10 +69,10 @@ class TabOutput(QWidget):
             (1.0, 0.874, 0.729),   # Pastellorange
             (1.0, 1.0, 0.729),     # Pastellgelb
             (0.729, 1.0, 0.788),   # Pastellgrün
+            (0.729, 1.0, 1.0),     # Pastelltürkis
             (0.729, 0.882, 1.0),   # Pastellblau
             (0.855, 0.729, 1.0),   # Pastelllila
             (1.0, 0.729, 0.945),   # Pastellmagenta
-            (0.729, 1.0, 1.0),     # Pastelltürkis
             (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]

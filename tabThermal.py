@@ -153,10 +153,10 @@ class TabThermal(QWidget):
             (1.0, 0.874, 0.729),   # Pastellorange
             (1.0, 1.0, 0.729),     # Pastellgelb
             (0.729, 1.0, 0.788),   # Pastellgrün
+            (0.729, 1.0, 1.0),     # Pastelltürkis
             (0.729, 0.882, 1.0),   # Pastellblau
             (0.855, 0.729, 1.0),   # Pastelllila
             (1.0, 0.729, 0.945),   # Pastellmagenta
-            (0.729, 1.0, 1.0),     # Pastelltürkis
             (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
@@ -196,8 +196,8 @@ class TabThermal(QWidget):
         maxArea = max((layer['area'] for layer in structure))
         self.resThermResistance = 0
         for layer in structure:
-            self.resThermResistance += layer['thickness'] * 1000 / (layer['thermalConductivity'] * layer['area'] * 1000 * 1000)
+            self.resThermResistance += (layer['thickness']/1000) / (layer['thermalConductivity'] * layer['area']/1000/1000)
 
-        self.resThermConductCoeff = totalThickness * 1000 / (self.resThermResistance * maxArea * 1000 * 1000)   
+        self.resThermConductCoeff = (totalThickness/1000) / (self.resThermResistance * maxArea / 1000 / 1000)   
         self.outputResLabel.setText(f"Resulting Thermal Resistance: {self.resThermResistance:e} K/W")
         self.outputConductLabel.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConductCoeff:e} W/mK")

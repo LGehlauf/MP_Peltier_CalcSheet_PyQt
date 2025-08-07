@@ -49,13 +49,19 @@ class TabElectrical(QWidget):
         self.table.customContextMenuRequested.connect(self.rightClickOnTable)
         self.setTable(layoutIndex=0)
 
-        ### input number of Repetitition Layout
+        ### input number of Repetititions and Peltier Coeff Layout
         repLayout = QHBoxLayout()
         self.inNumReps = QLineEdit()
         self.displayNumReps(self.currentLayoutIndex)
         self.inNumReps.textChanged.connect(self.saveNumReps)
+
+        self.inSeebeckCoeff = QLineEdit()
+        self.displaySeebeckCoeff(self.currentLayoutIndex)
+        self.inSeebeckCoeff.textChanged.connect(self.saveSeebeckCoeff)
         repLayout.addWidget(QLabel("Number of Repititions: "))
         repLayout.addWidget(self.inNumReps)
+        repLayout.addWidget(QLabel("Combined Seebeck Coefficient: (µV/K)"))
+        repLayout.addWidget(self.inSeebeckCoeff)
 
         ### output layout 
         outputLayout = QHBoxLayout()
@@ -135,6 +141,7 @@ class TabElectrical(QWidget):
         self.inNumReps.setText(str(self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']))
 
     def saveNumReps(self):
+        print("saveNum")
         numReps = self.inNumReps.text()
         try: 
             numReps = int(numReps)
@@ -143,12 +150,23 @@ class TabElectrical(QWidget):
         self.cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions'] = numReps
         self.setOutput(self.currentLayoutIndex)
 
+    def displaySeebeckCoeff(self, layoutIndex):
+        self.inNumReps.setText(str(self.cache['layouts'][layoutIndex]['combinedSeebeckCoefficient']))
+
+    def saveSeebeckCoeff(self):
+        seebeckCoeff = self.inSeebeckCoeff.text()
+        try: 
+            seebeckCoeff = float(seebeckCoeff)
+        except:
+            return
+        self.cache['layouts'][self.currentLayoutIndex]['combinedSeebeckCoefficient'] = seebeckCoeff
+
     def setOutput(self, layoutIndex):
         structure = self.cache['layouts'][layoutIndex]['electricalStructure']
 
         self.resElResistance = 0
         for con in structure:
-            self.resElResistance += con['specElResistance'] * con['length'] * 1000 / (con['crossSection'] * 1000 * 1000)
+            self.resElResistance += con['specElResistance'] * (con['length']/1000) / (con['crossSection']/1000/1000)
         self.resElResistance *= self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']
         self.outputResLabel.setText(f"Resulting Electrical Resistance: {self.resElResistance:e} Ohm") 
 

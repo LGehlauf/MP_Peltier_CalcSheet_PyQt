@@ -16,7 +16,13 @@
                     "thermalConductivity": 401
                 },
                 {
-                    "material": "BiTe",
+                    "material": "BiTe-n",
+                    "area": 393.75,
+                    "thickness": 1.25,
+                    "thermalConductivity": 1.2
+                },
+                {
+                    "material": "BiTe-p",
                     "area": 393.75,
                     "thickness": 1.25,
                     "thermalConductivity": 1.2
@@ -37,30 +43,30 @@
             "electricalStructure": [
                 {
                     "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
+                    "crossSection": 0.125,
+                    "length": 1.25,
+                    "specElResistance": 1.68e-08
                 },
                 {
-                    "material": "al",
-                    "crossSection": 20.0,
-                    "length": 3.0,
-                    "specElResistance": 1.59e-08
+                    "material": "BiTe-n",
+                    "crossSection": 1.5625,
+                    "length": 1.25,
+                    "specElResistance": 1.984e-05
+                },
+                {
+                    "material": "BiTe-p",
+                    "crossSection": 1.5625,
+                    "length": 1.25,
+                    "specElResistance": 1.984e-05
                 },
                 {
                     "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
+                    "crossSection": 0.125,
+                    "length": 1.25,
+                    "specElResistance": 1.68e-08
                 }
             ],
-            "numberOfElectricalRepetitions": 20,
+            "numberOfElectricalRepetitions": 126,
             "combinedSeebeckCoefficient": 480
         },
         {
@@ -94,24 +100,13 @@
             "electricalStructure": [
                 {
                     "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 1.1,
-                    "length": 1,
-                    "specElResistance": 1
+                    "crossSection": 1,
+                    "length": 1000,
+                    "specElResistance": 1.68
                 }
             ],
-            "numberOfElectricalRepetitions": 270
+            "numberOfElectricalRepetitions": 1,
+            "combinedSeebeckCoefficient": 480
         },
         {
             "name": "custom1",
@@ -155,7 +150,8 @@
                     "specElResistance": 1
                 }
             ],
-            "numberOfElectricalRepetitions": 27
+            "numberOfElectricalRepetitions": 27,
+            "combinedSeebeckCoefficient": 480
         }
     ]
 }

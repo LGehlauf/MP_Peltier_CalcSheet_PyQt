@@ -16,6 +16,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.currentLayoutIndex = 0
         self.cache = self.readCache()
         self.setWindowTitle("MyApp")
         # self.setFixedSize(QSize(400, 300))
@@ -40,23 +41,40 @@ class MainWindow(QMainWindow):
 
         ### different tabs
         tabs = QTabWidget()
-        tabThermal = TabThermal(self.cache)
-        tabElectrical = TabElectrical(self.cache)
-        tabOutput = TabOutput(self.cache)
-        tabs.addTab(tabOutput, "Output")
-        tabs.addTab(tabThermal, "Thermal Structure")
-        tabs.addTab(tabElectrical, "Electrical Structure")
-        self.layoutChoiceDropdown.activated.connect(tabThermal.setTable) # dropdown menu tells current layout index
-        self.layoutChoiceDropdown.activated.connect(tabThermal.drawLayersSvg) 
-        self.layoutChoiceDropdown.activated.connect(tabThermal.setOutput) 
-        self.layoutChoiceDropdown.activated.connect(tabElectrical.setTable) 
-        self.layoutChoiceDropdown.activated.connect(tabElectrical.displayNumReps) 
-        self.layoutChoiceDropdown.activated.connect(tabElectrical.setOutput) 
-        self.layoutChoiceDropdown.activated.connect(tabOutput.drawSankeySvg) 
+        self.tabThermal = TabThermal(self.cache)
+        self.tabElectrical = TabElectrical(self.cache)
+        self.tabOutput = TabOutput(self.cache)
+        tabs.addTab(self.tabOutput, "Output")
+        tabs.addTab(self.tabThermal, "Thermal Structure")
+        tabs.addTab(self.tabElectrical, "Electrical Structure")
+        tabs.currentChanged.connect(self.activateTab)
+        self.layoutChoiceDropdown.activated.connect(self.setCurrentLayoutIndexUpdateTabs)
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
         # self.setCentralWidget(self.layoutChoice)
+
+    def setCurrentLayoutIndexUpdateTabs(self, layoutIndex):
+        self.currentLayoutIndex = layoutIndex
+        self.tabThermal.setTable(layoutIndex)
+        self.tabThermal.drawLayersSvg(layoutIndex)
+        self.tabThermal.setOutput(layoutIndex)
+        self.tabElectrical.setTable(layoutIndex)
+        self.tabElectrical.displayNumReps(layoutIndex)
+        self.tabElectrical.setOutput(layoutIndex)
+        self.tabOutput.drawSankeySvg(layoutIndex)
+
+    def activateTab(self, tabIndex):
+        if tabIndex == 0:
+            self.tabOutput.drawSankeySvg(self.currentLayoutIndex)
+        elif tabIndex == 1:
+            self.tabThermal.setTable(self.currentLayoutIndex)
+            self.tabThermal.drawLayersSvg(self.currentLayoutIndex)
+            self.tabThermal.setOutput(self.currentLayoutIndex)
+        elif tabIndex == 2:
+            self.tabElectrical.setTable(self.currentLayoutIndex)
+            self.tabElectrical.displayNumReps(self.currentLayoutIndex)
+            self.tabElectrical.setOutput(self.currentLayoutIndex)
 
     def readCache(self):
         with open('cache.json', 'r') as file:
