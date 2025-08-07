@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QTableWidget,
-    QTableWidgetItem, QMenu, QLabel,QHeaderView
+    QTableWidgetItem, QMenu, QLabel, QHeaderView,
+    QCheckBox
 )
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
@@ -18,12 +19,14 @@ class PlotCanvas(FigureCanvas):
         super().__init__(self.fig)
         self.setParent(parent)
 
-    def plot_I_P(self, heatfluxi):
+    def plot_I_P(self, heatfluxi, tempDiffs):
         self.ax.clear()
-        self.ax.plot(heatfluxi['I'], heatfluxi['P_Peltier'], label="Peltier Heatflux")
-        self.ax.plot(heatfluxi['I'], heatfluxi['P_Joule'], label="Joule Heatflux")
-        self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConduct'], label="Conductivity Heatflux")
-        self.ax.plot(heatfluxi['I'], heatfluxi['P_Res'], label="Resulting Cold-Side Heatflux")
+        for i, tempDiff in enumerate(tempDiffs):
+            self.ax.plot(heatfluxi['I'], heatfluxi['P_Results'][i], label=f"{tempDiff}", color='green', linewidth=2)
+            if False: # !!! # TODO -> also better labels
+                self.ax.plot(heatfluxi['I'], heatfluxi['P_Peltier'], label="Peltier Heatflux", color='blue', linewidth=1)
+                self.ax.plot(heatfluxi['I'], heatfluxi['P_Joule'], label="Joule Heatflux", color='orange', linewidth=1)
+                self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConduct'], label="Conductivity Heatflux", color='red', linewidth=1)
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
         self.ax.legend()
@@ -34,24 +37,35 @@ class TabOutput(QWidget):
         super().__init__()
         self.cache = cache
         self.currentLayoutIndex = 0
+        self.tempDiffs = [0, 10, 20, 30]
+        self.mplPlot = PlotCanvas(parent=self)
+
+        ### checkboxes
+        checkBoxLayout = QVBoxLayout()
+        checkBoxLayout.addWidget(QLabel("Hot-Cold-Side\nTemperature\nDifference:"))
+        self.checkBoxes = [] 
+        for tempDiff in self.tempDiffs:
+            checkBox = QCheckBox(f"{tempDiff} K")
+            checkBox.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) # function needs mplplot
+            checkBoxLayout.addWidget(checkBox)
+            self.checkBoxes.append(checkBox)
+
+        ### mpl plot
+        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, self.tempDiffs)
+        self.createPlot(self.currentLayoutIndex)
 
         ### svg
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         self.drawSankeySvg(self.currentLayoutIndex)
 
-
-        ### mpl plot
-        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex)
-        self.mplPlot = PlotCanvas(parent=self)
-        self.createPlot(self.currentLayoutIndex)
-
         assemblyLayout = QHBoxLayout()
+        assemblyLayout.addLayout(checkBoxLayout)
         assemblyLayout.addWidget(self.mplPlot)
         assemblyLayout.addWidget(self.svg)
         self.setLayout(assemblyLayout)
     
-    def calcHeatfluxi(self, layoutIndex):
+    def calcHeatfluxi(self, layoutIndex, tempDiffs):
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
         current = np.linspace(0, 6, 100)
@@ -62,22 +76,35 @@ class TabOutput(QWidget):
         ) # V
         P_Peltier = current * resPeltierCoefficient
         P_Joule = current * current * layout['resElectricalResistance']
-        tempDiff = np.linspace(10, 10, 100)
-        P_HeatConduct = tempDiff / layout['resThermalResistance']
-        P_Res = P_Peltier - 0.5 * P_Joule - P_HeatConduct
+        # tempDiff = np.linspace(10, 10, 100)
+        P_HeatConducts = []
+        P_Results = []
+        for tempDiff in tempDiffs:
+            npTempDiff = np.linspace(tempDiff, tempDiff, 100)
+            P_HeatConduct = npTempDiff / layout['resThermalResistance']
+            P_HeatConducts.append(P_HeatConduct)
+            P_Results.append(P_Peltier - 0.5 * P_Joule - P_HeatConduct)
+
+        # P_HeatConduct = tempDiff / layout['resThermalResistance']
+        # P_Res = P_Peltier - 0.5 * P_Joule - P_HeatConduct
 
         return {
             'I': current,
             'P_Joule': P_Joule,
             'P_Peltier': P_Peltier,
-            'P_HeatConduct': P_HeatConduct,
-            'P_Res': P_Res
+            'P_HeatConducts': P_HeatConducts,
+            'P_Results': P_Results
         }
 
     def createPlot(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
-        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex)
-        self.mplPlot.plot_I_P(heatfluxi)
+        tempDiffs = []
+        for i, box in enumerate(self.checkBoxes):
+            if box.isChecked():
+                tempDiffs.append(self.tempDiffs[i])
+
+        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs)
+        self.mplPlot.plot_I_P(heatfluxi, tempDiffs)
 
 
     def drawSankeySvg(self, layoutIndex): 
