@@ -67,7 +67,9 @@
                 }
             ],
             "numberOfElectricalRepetitions": 126,
-            "combinedSeebeckCoefficient": 480
+            "combinedSeebeckCoefficient": 480,
+            "resElectricalResistance": 4.04208,
+            "resThermalResistance": 5.3272719655886736
         },
         {
             "name": "default",
@@ -106,7 +108,9 @@
                 }
             ],
             "numberOfElectricalRepetitions": 1,
-            "combinedSeebeckCoefficient": 480
+            "combinedSeebeckCoefficient": 480,
+            "resElectricalResistance": 1680000.0,
+            "resThermalResistance": 6458.041958041958
         },
         {
             "name": "custom1",
@@ -151,7 +155,9 @@
                 }
             ],
             "numberOfElectricalRepetitions": 27,
-            "combinedSeebeckCoefficient": 480
+            "combinedSeebeckCoefficient": 480,
+            "resElectricalResistance": 73636.36363636363,
+            "resThermalResistance": 2937.0629370629367
         }
     ]
 }

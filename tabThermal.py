@@ -194,10 +194,11 @@ class TabThermal(QWidget):
         structure = self.cache['layouts'][layoutIndex]['thermalStructure']
         totalThickness = sum((layer['thickness'] for layer in structure))
         maxArea = max((layer['area'] for layer in structure))
-        self.resThermResistance = 0
+        resThermResistance = 0
         for layer in structure:
-            self.resThermResistance += (layer['thickness']/1000) / (layer['thermalConductivity'] * layer['area']/1000/1000)
+            resThermResistance += (layer['thickness']/1000) / (layer['thermalConductivity'] * layer['area']/1000/1000)
 
-        self.resThermConductCoeff = (totalThickness/1000) / (self.resThermResistance * maxArea / 1000 / 1000)   
-        self.outputResLabel.setText(f"Resulting Thermal Resistance: {self.resThermResistance:e} K/W")
-        self.outputConductLabel.setText(f"Resulting Thermal Conductivity Coefficient: {self.resThermConductCoeff:e} W/mK")
+        resThermConductCoeff = (totalThickness/1000) / (resThermResistance * maxArea / 1000 / 1000)   
+        self.outputResLabel.setText(f"Resulting Thermal Resistance: {resThermResistance:e} K/W")
+        self.outputConductLabel.setText(f"Resulting Thermal Conductivity Coefficient: {resThermConductCoeff:e} W/mK")
+        self.cache['layouts'][layoutIndex]['resThermalResistance'] = resThermResistance

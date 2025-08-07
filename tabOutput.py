@@ -11,22 +11,21 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 
-
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-        self.plot()
 
-    def plot(self):
-        x = np.linspace(0, 10, 100)
-        y = np.sin(x)
-        self.ax.plot(x, y, label="sin(x)")
-        self.ax.set_title("X-Y Diagramm")
-        self.ax.set_xlabel("X")
-        self.ax.set_ylabel("Y")
+    def plot_I_P(self, heatfluxi):
+        self.ax.clear()
+        self.ax.plot(heatfluxi['I'], heatfluxi['P_Peltier'], label="Peltier Heatflux")
+        self.ax.plot(heatfluxi['I'], heatfluxi['P_Joule'], label="Joule Heatflux")
+        self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConduct'], label="Conductivity Heatflux")
+        self.ax.plot(heatfluxi['I'], heatfluxi['P_Res'], label="Resulting Cold-Side Heatflux")
+        self.ax.set_xlabel("I [A]")
+        self.ax.set_ylabel("P [W]")
         self.ax.legend()
         self.draw()
 
@@ -41,21 +40,44 @@ class TabOutput(QWidget):
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         self.drawSankeySvg(self.currentLayoutIndex)
 
+
         ### mpl plot
-        self.mplPlot = PlotCanvas(self)
+        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex)
+        self.mplPlot = PlotCanvas(parent=self)
+        self.createPlot(self.currentLayoutIndex)
 
         assemblyLayout = QHBoxLayout()
         assemblyLayout.addWidget(self.mplPlot)
         assemblyLayout.addWidget(self.svg)
         self.setLayout(assemblyLayout)
     
-    def calcHeatflux(self, layoutIndex):
-        # seebeck coefficient: 480 µV/K  
-        # -> peltier coefficient: 140.7 mV
+    def calcHeatfluxi(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
-        resPeltierCoefficient = layout['combinedSeebeckCoefficient'] * layout['numberOfElectricalRepetitions'] # mV
-        # TODO: build W/U diagram, sankeys
+        current = np.linspace(0, 6, 100)
+        resPeltierCoefficient = (
+            layout['combinedSeebeckCoefficient']/1000/1000 # µV/K -> V/K
+            * layout['numberOfElectricalRepetitions'] 
+            * 293.15 # temperature
+        ) # V
+        P_Peltier = current * resPeltierCoefficient
+        P_Joule = current * current * layout['resElectricalResistance']
+        tempDiff = np.linspace(10, 10, 100)
+        P_HeatConduct = tempDiff / layout['resThermalResistance']
+        P_Res = P_Peltier - 0.5 * P_Joule - P_HeatConduct
+
+        return {
+            'I': current,
+            'P_Joule': P_Joule,
+            'P_Peltier': P_Peltier,
+            'P_HeatConduct': P_HeatConduct,
+            'P_Res': P_Res
+        }
+
+    def createPlot(self, layoutIndex):
+        self.currentLayoutIndex = layoutIndex
+        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex)
+        self.mplPlot.plot_I_P(heatfluxi)
 
 
     def drawSankeySvg(self, layoutIndex): 

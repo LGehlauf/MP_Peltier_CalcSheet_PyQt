@@ -173,11 +173,12 @@ class TabElectrical(QWidget):
     def setOutput(self, layoutIndex):
         structure = self.cache['layouts'][layoutIndex]['electricalStructure']
 
-        self.resElResistance = 0
+        resElResistance = 0
         for con in structure:
-            self.resElResistance += con['specElResistance'] * (con['length']/1000) / (con['crossSection']/1000/1000)
-        self.resElResistance *= self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']
-        self.outputResLabel.setText(f"Resulting Electrical Resistance: {self.resElResistance:e} Ohm") 
+            resElResistance += con['specElResistance'] * (con['length']/1000) / (con['crossSection']/1000/1000)
+        resElResistance *= self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']
+        self.outputResLabel.setText(f"Resulting Electrical Resistance: {resElResistance:e} Ohm") 
+        self.cache['layouts'][layoutIndex]['resElectricalResistance'] = resElResistance
 
         
 

@@ -56,17 +56,22 @@ class MainWindow(QMainWindow):
 
     def setCurrentLayoutIndexUpdateTabs(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
+
+        self.tabOutput.drawSankeySvg(layoutIndex)
+        self.tabOutput.createPlot(layoutIndex)
+
         self.tabThermal.setTable(layoutIndex)
         self.tabThermal.drawLayersSvg(layoutIndex)
         self.tabThermal.setOutput(layoutIndex)
+
         self.tabElectrical.setTable(layoutIndex)
         self.tabElectrical.displayNumReps(layoutIndex)
         self.tabElectrical.setOutput(layoutIndex)
-        self.tabOutput.drawSankeySvg(layoutIndex)
 
     def activateTab(self, tabIndex):
         if tabIndex == 0:
             self.tabOutput.drawSankeySvg(self.currentLayoutIndex)
+            self.tabOutput.createPlot(self.currentLayoutIndex)
         elif tabIndex == 1:
             self.tabThermal.setTable(self.currentLayoutIndex)
             self.tabThermal.drawLayersSvg(self.currentLayoutIndex)
