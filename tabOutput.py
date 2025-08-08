@@ -19,14 +19,14 @@ class PlotCanvas(FigureCanvas):
         super().__init__(self.fig)
         self.setParent(parent)
 
-    def plot_I_P(self, heatfluxi, tempDiffs):
+    def plot_I_P(self, heatfluxi, tempDiffs, showComponents):
         self.ax.clear()
         for i, tempDiff in enumerate(tempDiffs):
             self.ax.plot(heatfluxi['I'], heatfluxi['P_Results'][i], label=f"{tempDiff}", color='green', linewidth=2)
-            if False: # !!! # TODO -> also better labels
+            if showComponents: # TODO : better labels
                 self.ax.plot(heatfluxi['I'], heatfluxi['P_Peltier'], label="Peltier Heatflux", color='blue', linewidth=1)
                 self.ax.plot(heatfluxi['I'], heatfluxi['P_Joule'], label="Joule Heatflux", color='orange', linewidth=1)
-                self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConduct'], label="Conductivity Heatflux", color='red', linewidth=1)
+                self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConducts'][i], label="Conductivity Heatflux", color='red', linewidth=1)
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
         self.ax.legend()
@@ -38,17 +38,33 @@ class TabOutput(QWidget):
         self.cache = cache
         self.currentLayoutIndex = 0
         self.tempDiffs = [0, 10, 20, 30]
+        # self.heatfluxi = ["P_Peltier", "P_Joule", "P_HeatConductivity", "P_Combined"]
         self.mplPlot = PlotCanvas(parent=self)
 
         ### checkboxes
-        checkBoxLayout = QVBoxLayout()
-        checkBoxLayout.addWidget(QLabel("Hot-Cold-Side\nTemperature\nDifference:"))
-        self.checkBoxes = [] 
+        checkBoxLayout = QHBoxLayout()
+
+        # checkBoxHeatfluxiLayout = QVBoxLayout()
+        # checkBoxHeatfluxiLayout.addWidget(QLabel("Display\nHeatflux:"))
+        # self.checkBoxesHeatfluxi = []
+        # for heatfluxLabel in self.heatfluxi:
+        #     checkBoxHeatflux = QCheckBox(heatfluxLabel)
+        #     checkBoxHeatflux.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+        #     checkBoxHeatfluxiLayout.addWidget(checkBoxHeatflux)
+        #     self.checkBoxesHeatfluxi.append(checkBoxHeatflux)
+
+        checkBoxTempDiffLayout = QVBoxLayout()
+        self.toggleButtonHeatfluxComponents = QPushButton("Toggle Components")
+        self.toggleButtonHeatfluxComponents.setCheckable(True)
+        self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+        checkBoxTempDiffLayout.addWidget(QLabel("Hot-Cold-Side\nTemperature\nDifference:"))
+        self.checkBoxesTempDiff = [] 
         for tempDiff in self.tempDiffs:
-            checkBox = QCheckBox(f"{tempDiff} K")
-            checkBox.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) # function needs mplplot
-            checkBoxLayout.addWidget(checkBox)
-            self.checkBoxes.append(checkBox)
+            checkBoxTempDiff = QCheckBox(f"{tempDiff} K")
+            checkBoxTempDiff.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) 
+            checkBoxTempDiffLayout.addWidget(checkBoxTempDiff)
+            self.checkBoxesTempDiff.append(checkBoxTempDiff)
+        checkBoxTempDiffLayout.addWidget(self.toggleButtonHeatfluxComponents)
 
         ### mpl plot
         heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, self.tempDiffs)
@@ -60,7 +76,8 @@ class TabOutput(QWidget):
         self.drawSankeySvg(self.currentLayoutIndex)
 
         assemblyLayout = QHBoxLayout()
-        assemblyLayout.addLayout(checkBoxLayout)
+        # assemblyLayout.addLayout(checkBoxHeatfluxiLayout)
+        assemblyLayout.addLayout(checkBoxTempDiffLayout)
         assemblyLayout.addWidget(self.mplPlot)
         assemblyLayout.addWidget(self.svg)
         self.setLayout(assemblyLayout)
@@ -75,15 +92,15 @@ class TabOutput(QWidget):
             * 293.15 # temperature
         ) # V
         P_Peltier = current * resPeltierCoefficient
-        P_Joule = current * current * layout['resElectricalResistance']
+        P_Joule = - current * current * layout['resElectricalResistance']
         # tempDiff = np.linspace(10, 10, 100)
         P_HeatConducts = []
         P_Results = []
         for tempDiff in tempDiffs:
             npTempDiff = np.linspace(tempDiff, tempDiff, 100)
-            P_HeatConduct = npTempDiff / layout['resThermalResistance']
+            P_HeatConduct = - npTempDiff / layout['resThermalResistance']
             P_HeatConducts.append(P_HeatConduct)
-            P_Results.append(P_Peltier - 0.5 * P_Joule - P_HeatConduct)
+            P_Results.append(P_Peltier + 0.5 * P_Joule + P_HeatConduct)
 
         # P_HeatConduct = tempDiff / layout['resThermalResistance']
         # P_Res = P_Peltier - 0.5 * P_Joule - P_HeatConduct
@@ -99,12 +116,19 @@ class TabOutput(QWidget):
     def createPlot(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
         tempDiffs = []
-        for i, box in enumerate(self.checkBoxes):
+        for i, box in enumerate(self.checkBoxesTempDiff):
             if box.isChecked():
                 tempDiffs.append(self.tempDiffs[i])
+        
+        showComponents = self.toggleButtonHeatfluxComponents.isChecked()
 
-        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs)
-        self.mplPlot.plot_I_P(heatfluxi, tempDiffs)
+        # heatfluxiLabels = []
+        # for i, box in enumerate(self.checkBoxesHeatfluxi):
+        #     if box.isChecked():
+        #         heatfluxilabels.append(self.heatfluxi[i])
+
+        heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs)
+        self.mplPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
 
 
     def drawSankeySvg(self, layoutIndex): 
