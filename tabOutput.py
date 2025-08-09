@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QTableWidget,
     QTableWidgetItem, QMenu, QLabel, QHeaderView,
-    QCheckBox
+    QCheckBox, QSizePolicy, QSlider
 )
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
@@ -19,16 +19,56 @@ class PlotCanvas(FigureCanvas):
         super().__init__(self.fig)
         self.setParent(parent)
 
-    def plot_I_P(self, heatfluxi, tempDiffs, showComponents):
+    def plot_I_P(self, heatfluxi, dTs, showComponents):
         self.ax.clear()
-        for i, tempDiff in enumerate(tempDiffs):
-            self.ax.plot(heatfluxi['I'], heatfluxi['P_Results'][i], label=f"{tempDiff}", color='green', linewidth=2)
-            if showComponents: # TODO : better labels
-                self.ax.plot(heatfluxi['I'], heatfluxi['P_Peltier'], label="Peltier Heatflux", color='blue', linewidth=1)
-                self.ax.plot(heatfluxi['I'], heatfluxi['P_Joule'], label="Joule Heatflux", color='orange', linewidth=1)
-                self.ax.plot(heatfluxi['I'], heatfluxi['P_HeatConducts'][i], label="Conductivity Heatflux", color='red', linewidth=1)
+        I = heatfluxi['I']
+        P_Ress = heatfluxi['P_Results']
+        P_Pe = heatfluxi['P_Peltier']
+        P_J = heatfluxi['P_Joule']
+        P_Ls = heatfluxi['P_HeatConducts']
+        if len(dTs) == 1:
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            if showComponents:
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+
+        elif len(dTs) == 2:
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            if showComponents:
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+
+        elif len(dTs) == 3:
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            self.ax.plot(I, P_Ress[2], label=f"$P_{{Res}}$($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
+            if showComponents:
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+
+        elif len(dTs) == 4:
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            self.ax.plot(I, P_Ress[2], label=f"$P_{{Res}}$($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
+            self.ax.plot(I, P_Ress[3], label=f"$P_{{Res}}$($\Delta$T={dTs[3]} K)", c='green', lw=2, ls='-.')
+            if showComponents:
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+                self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
+
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
+        self.ax.grid()
         self.ax.legend()
         self.draw()
 
@@ -37,37 +77,85 @@ class TabOutput(QWidget):
         super().__init__()
         self.cache = cache
         self.currentLayoutIndex = 0
+
+        self.init()
+        self.connect()
+    
+    def init(self):
         self.tempDiffs = [0, 10, 20, 30]
-        # self.heatfluxi = ["P_Peltier", "P_Joule", "P_HeatConductivity", "P_Combined"]
         self.mplPlot = PlotCanvas(parent=self)
 
-        ### checkboxes
-        checkBoxLayout = QHBoxLayout()
+        ### checkboxes delta T
+        deltaTLayout = QVBoxLayout()
 
-        # checkBoxHeatfluxiLayout = QVBoxLayout()
-        # checkBoxHeatfluxiLayout.addWidget(QLabel("Display\nHeatflux:"))
-        # self.checkBoxesHeatfluxi = []
-        # for heatfluxLabel in self.heatfluxi:
-        #     checkBoxHeatflux = QCheckBox(heatfluxLabel)
-        #     checkBoxHeatflux.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
-        #     checkBoxHeatfluxiLayout.addWidget(checkBoxHeatflux)
-        #     self.checkBoxesHeatfluxi.append(checkBoxHeatflux)
-
-        checkBoxTempDiffLayout = QVBoxLayout()
-        self.toggleButtonHeatfluxComponents = QPushButton("Toggle Components")
+        self.toggleButtonHeatfluxComponents = QPushButton("Toggle\nComponents")
         self.toggleButtonHeatfluxComponents.setCheckable(True)
-        self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlot(self.currentLayoutIndex))
-        checkBoxTempDiffLayout.addWidget(QLabel("Hot-Cold-Side\nTemperature\nDifference:"))
+        self.toggleButtonHeatfluxComponents.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        checkBoxTempDiffLabel = QLabel()
+        checkBoxTempDiffLabel.setText("Δ T")
+        deltaTLayout.addWidget(checkBoxTempDiffLabel)
         self.checkBoxesTempDiff = [] 
         for tempDiff in self.tempDiffs:
             checkBoxTempDiff = QCheckBox(f"{tempDiff} K")
-            checkBoxTempDiff.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) 
-            checkBoxTempDiffLayout.addWidget(checkBoxTempDiff)
+            deltaTLayout.addWidget(checkBoxTempDiff)
             self.checkBoxesTempDiff.append(checkBoxTempDiff)
-        checkBoxTempDiffLayout.addWidget(self.toggleButtonHeatfluxComponents)
+        self.checkBoxesTempDiff[1].setChecked(True)
+        deltaTLayout.addWidget(self.toggleButtonHeatfluxComponents)
+
+        ### slider electrical and thermal resistance
+        manipLayoutContainer = QWidget()
+        manipLayout = QHBoxLayout(manipLayoutContainer)
+
+        manipElResLayout = QVBoxLayout()
+        manipElResLayout.addWidget(QLabel("Electrical Resistance Manipulation"))
+        self.sliderElRes = QSlider(Qt.Orientation.Horizontal)
+        self.sliderElRes.setMinimum(1)
+        self.sliderElRes.setMaximum(200)
+        self.sliderElRes.setValue(100)
+        manipElResLayout.addWidget(self.sliderElRes)
+        manipElResLabelLayout = QHBoxLayout()
+        manipElResMinLabel = QLabel(f"{self.sliderElRes.minimum()} %")
+        manipElResMinLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.manipElResMidLabel = QLabel()
+        self.manipElResMidLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        manipElResMaxLabel = QLabel(f"{self.sliderElRes.maximum()} %")
+        manipElResMaxLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        manipElResLabelLayout.addWidget(manipElResMinLabel)
+        manipElResLabelLayout.addStretch()
+        manipElResLabelLayout.addWidget(self.manipElResMidLabel)
+        manipElResLabelLayout.addStretch()
+        manipElResLabelLayout.addWidget(manipElResMaxLabel)
+        manipElResLayout.addLayout(manipElResLabelLayout)
+        manipLayout.addLayout(manipElResLayout)
+
+        manipThermResLayout = QVBoxLayout()
+        sliderThermResLabel = QLabel()
+        sliderThermResLabel.setText("Thermal Resistance Manipulation")
+        manipThermResLayout.addWidget(sliderThermResLabel)
+        self.sliderThermRes = QSlider(Qt.Orientation.Horizontal)
+        self.sliderThermRes.setMinimum(1)
+        self.sliderThermRes.setMaximum(200)
+        self.sliderThermRes.setValue(100)
+        manipThermResLayout.addWidget(self.sliderThermRes)
+        manipThermResLabelLayout = QHBoxLayout()
+        manipThermResMinLabel = QLabel(f"{self.sliderThermRes.minimum()} %")
+        manipThermResMinLabel.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.manipThermResMidLabel = QLabel()
+        self.manipThermResMidLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        manipThermResMaxLabel = QLabel(f"{self.sliderThermRes.maximum()} %")
+        manipThermResMaxLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        manipThermResLabelLayout.addWidget(manipThermResMinLabel)
+        manipThermResLabelLayout.addStretch()
+        manipThermResLabelLayout.addWidget(self.manipThermResMidLabel)
+        manipThermResLabelLayout.addStretch()
+        manipThermResLabelLayout.addWidget(manipThermResMaxLabel)
+        manipThermResLayout.addLayout(manipThermResLabelLayout)
+        manipLayout.addLayout(manipThermResLayout)
+
+        manipLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         ### mpl plot
-        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, self.tempDiffs)
+        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, self.tempDiffs, 1, 1)
         self.createPlot(self.currentLayoutIndex)
 
         ### svg
@@ -75,14 +163,45 @@ class TabOutput(QWidget):
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         self.drawSankeySvg(self.currentLayoutIndex)
 
-        assemblyLayout = QHBoxLayout()
-        # assemblyLayout.addLayout(checkBoxHeatfluxiLayout)
-        assemblyLayout.addLayout(checkBoxTempDiffLayout)
-        assemblyLayout.addWidget(self.mplPlot)
-        assemblyLayout.addWidget(self.svg)
+        assemblyLayout = QVBoxLayout()
+        boxesAndPlotsLayoutContainer = QWidget()
+        boxesAndPlotsLayout = QHBoxLayout(boxesAndPlotsLayoutContainer)
+        boxesAndPlotsLayout.addLayout(deltaTLayout)
+        boxesAndPlotsLayout.addWidget(self.mplPlot)
+        boxesAndPlotsLayout.addWidget(self.svg)
+        boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # assemblyLayout.addLayout(boxesAndPlotsLayout)
+        assemblyLayout.addWidget(boxesAndPlotsLayoutContainer)
+        # assemblyLayout.addLayout(manipLayout)
+        assemblyLayout.addWidget(manipLayoutContainer)
         self.setLayout(assemblyLayout)
+
+    def connect(self):
+        self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+        for box in self.checkBoxesTempDiff:
+            box.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) 
+        self.sliderElRes.valueChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+        self.sliderThermRes.valueChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
     
-    def calcHeatfluxi(self, layoutIndex, tempDiffs):
+    def createPlot(self, layoutIndex):
+        self.currentLayoutIndex = layoutIndex
+        tempDiffs = []
+        for i, box in enumerate(self.checkBoxesTempDiff):
+            if box.isChecked():
+                tempDiffs.append(self.tempDiffs[i])
+
+        elResFactor = self.sliderElRes.value() / 100
+        thermResFactor = self.sliderThermRes.value() / 100
+        self.manipElResMidLabel.setText(f"{elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)")
+        self.manipThermResMidLabel.setText(f"{thermResFactor * 100:.0f} % ({thermResFactor * self.cache['layouts'][self.currentLayoutIndex]['resThermalResistance']:.2f} W/mK)")
+        thermResFactor = self.sliderThermRes.value() / 100
+        
+        showComponents = self.toggleButtonHeatfluxComponents.isChecked()
+
+        heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs, elResFactor, thermResFactor)
+        self.mplPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
+
+    def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
         current = np.linspace(0, 6, 100)
@@ -92,18 +211,14 @@ class TabOutput(QWidget):
             * 293.15 # temperature
         ) # V
         P_Peltier = current * resPeltierCoefficient
-        P_Joule = - current * current * layout['resElectricalResistance']
-        # tempDiff = np.linspace(10, 10, 100)
+        P_Joule = - current * current * layout['resElectricalResistance'] * elResFactor
         P_HeatConducts = []
         P_Results = []
         for tempDiff in tempDiffs:
             npTempDiff = np.linspace(tempDiff, tempDiff, 100)
-            P_HeatConduct = - npTempDiff / layout['resThermalResistance']
+            P_HeatConduct = - npTempDiff / (layout['resThermalResistance'] * thermResFactor)
             P_HeatConducts.append(P_HeatConduct)
             P_Results.append(P_Peltier + 0.5 * P_Joule + P_HeatConduct)
-
-        # P_HeatConduct = tempDiff / layout['resThermalResistance']
-        # P_Res = P_Peltier - 0.5 * P_Joule - P_HeatConduct
 
         return {
             'I': current,
@@ -112,23 +227,6 @@ class TabOutput(QWidget):
             'P_HeatConducts': P_HeatConducts,
             'P_Results': P_Results
         }
-
-    def createPlot(self, layoutIndex):
-        self.currentLayoutIndex = layoutIndex
-        tempDiffs = []
-        for i, box in enumerate(self.checkBoxesTempDiff):
-            if box.isChecked():
-                tempDiffs.append(self.tempDiffs[i])
-        
-        showComponents = self.toggleButtonHeatfluxComponents.isChecked()
-
-        # heatfluxiLabels = []
-        # for i, box in enumerate(self.checkBoxesHeatfluxi):
-        #     if box.isChecked():
-        #         heatfluxilabels.append(self.heatfluxi[i])
-
-        heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs)
-        self.mplPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
 
 
     def drawSankeySvg(self, layoutIndex): 
