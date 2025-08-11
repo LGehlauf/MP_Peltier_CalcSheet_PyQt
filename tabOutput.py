@@ -237,10 +237,10 @@ class TabOutput(QWidget):
         P_Coldside = max(hfDict['P_Results'][0])
         maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
         current = hfDict['I'][maxCSPowerIndex]
-        P_Joule = hfDict['P_Joule'][maxCSPowerIndex]
-        P_HeatConduct = hfDict['P_HeatConducts'][maxCSPowerIndex]
-        P_HeatConduct = hfDict['P_HeatConducts'][maxCSPowerIndex] # TODO!
-
+        P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
+        P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
+        P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
+        P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
 
         if len(tempDiffs) > 0:
             self.svgLabel.setText(f"""
@@ -253,8 +253,16 @@ class TabOutput(QWidget):
             self.svgLabel.setText(f"""
             """)
 
+        return {
+            'P_Hotside': P_Hotside,
+            'P_Coldside': P_Coldside,
+            'P_Joule': P_Joule,
+            'P_HeatConduct': P_HeatConduct,
+            'P_Peltier': P_Peltier
+        }
 
-    def drawSankeySvg(self, layoutIndex, hfDict): 
+
+    def drawSankeySvg(self, layoutIndex, hfDict):
         self.currentLayoutIndex = layoutIndex
         layoutName = self.cache['layouts'][layoutIndex]['name']
         svgWidth, svgHeight = 500, 500
@@ -273,10 +281,10 @@ class TabOutput(QWidget):
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
         hfCols = {
-            'red': (1.0, 0.0, 0.0, 1.0),
-            'green': (0.0, 0.5019607843137255, 0.0, 1.0),
-            'blue': (0.0, 0.0, 1.0, 1.0),
-            'orange': (1.0, 0.6470588235294118, 0.0, 1.0)
+            'heatConduct': (1.0, 0.0, 0.0, 1.0), # red
+            'coldside': (0.0, 0.5019607843137255, 0.0, 1.0), # green
+            'peltier': (0.0, 0.0, 1.0, 1.0), # blue
+            'joule': (1.0, 0.6470588235294118, 0.0, 1.0) # orange
         }
         structure = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
         structureHeight = sum((layer['thickness'] for layer in structure))
@@ -311,17 +319,29 @@ class TabOutput(QWidget):
                 ct.fill()
             
             ### draw foreground
+            # > 0 check
+            for val in hfDict.values():
+                if val < 0:
+                    return
+
             # variables
-            hfTotalWidth = 0.9 * bgWidth
-            # hfResWidth = (hfDict['P_Results'][0] + hfDict['P_Peltier'])
+            hfx0 = bgStartX * 1.1
+            hfy0 = bgStartY
+            hfPixelRatio = 0.9 * bgWidth / (hfDict['P_Hotside'] + hfDict['P_HeatConduct'])
+            PHotSideWidth = hfDict['P_Hotside'] * hfPixelRatio
+            PJouleWidth = hfDict['P_Joule'] * hfPixelRatio
+            PColdsideWidth = hfDict['P_Coldside'] * hfPixelRatio
+            PHeatConductWidth = hfDict['P_HeatConduct'] * hfPixelRatio
+            PPeltierWidth = hfDict['P_Peltier'] * hfPixelRatio
+
+            # Joule
+            ct.set_source_rgba(*hfCols['joule'])
+            ct.move_to(0, svgHeight/2)
+            ct.line_to(hfx0*1.1, svgHeight/2)
+            ct.set_line_width(PJouleWidth)
 
 
-            # P_Res
-            # ct.set_source_rgba(*hfCols['green'])
-            # ct.move_to(svgWidth*0.5 + 20, svgHeight)
-            # ct.line_to(svgWidth*0.5 + 20, svgHeight-bgHeight + 20)
-            # ct.set_line_width()
-            # ct.stroke()
+            ct.stroke()
 
 
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
