@@ -281,6 +281,7 @@ class TabOutput(QWidget):
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
         hfCols = {
+            'black': (0,0,0,1), # black
             'heatConduct': (1.0, 0.0, 0.0, 1.0), # red
             'coldside': (0.0, 0.5019607843137255, 0.0, 1.0), # green
             'peltier': (0.0, 0.0, 1.0, 1.0), # blue
@@ -325,8 +326,14 @@ class TabOutput(QWidget):
                     return
 
             # variables
-            hfx0 = bgStartX * 1.1
-            hfy0 = bgStartY
+            margin = 20
+            hfStartX = bgStartX + margin
+            hfStartY = bgStartY + margin
+            hfEndX = bgStartX + bgWidth - margin
+            hfEndY = bgStartY + bgHeight - margin
+            hfMidX = (hfEndX - hfStartX)/2
+            hfMidY = (hfEndY - hfStartY)/2
+
             hfPixelRatio = 0.9 * bgWidth / (hfDict['P_Hotside'] + hfDict['P_HeatConduct'])
             PHotSideWidth = hfDict['P_Hotside'] * hfPixelRatio
             PJouleWidth = hfDict['P_Joule'] * hfPixelRatio
@@ -334,14 +341,41 @@ class TabOutput(QWidget):
             PHeatConductWidth = hfDict['P_HeatConduct'] * hfPixelRatio
             PPeltierWidth = hfDict['P_Peltier'] * hfPixelRatio
 
-            # Joule
+            # Joule start line
             ct.set_source_rgba(*hfCols['joule'])
-            ct.move_to(0, svgHeight/2)
-            ct.line_to(hfx0*1.1, svgHeight/2)
             ct.set_line_width(PJouleWidth)
-
-
+            ct.move_to(0, svgHeight/2)
+            ct.line_to(hfStartX, svgHeight/2)
             ct.stroke()
+            # Joule arc
+            # ct.arc(hfStartX, hfStartY, (hfEndY - hfStartY)/2 - PJouleWidth/4, 0, 0.5*np.pi)
+            # ct.translate()
+            # ct.set_line_width(PJouleWidth/2)
+            # ct.stroke()
+
+            # Coldside start line
+            ct.set_source_rgba(*hfCols['coldside'])
+            ct.set_line_width(PColdsideWidth)
+            ct.move_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth-PColdsideWidth/2, svgHeight)
+            ct.line_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth-PColdsideWidth/2, hfEndY)
+            ct.stroke()
+
+            # Heatconduct line
+            ct.set_source_rgba(*hfCols['heatConduct'])
+            ct.set_line_width(PHeatConductWidth)
+            ct.move_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfEndY-margin)
+            ct.line_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfStartY+margin)
+            ct.stroke()
+            # Heatconduct start and end block
+            ct.set_source_rgba(*hfCols['black'])
+            ct.move_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfEndY)
+            ct.line_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfEndY-margin)
+            ct.stroke()
+            ct.move_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfStartY)
+            ct.line_to(hfMidX+(PHotSideWidth/2)-PHeatConductWidth/2, hfStartY+margin)
+            ct.stroke()
+            
+
 
 
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
