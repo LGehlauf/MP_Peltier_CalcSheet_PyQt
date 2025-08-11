@@ -82,11 +82,12 @@ class TabOutput(QWidget):
         self.connect()
     
     def init(self):
-        self.tempDiffs = [0, 10, 20, 30]
+        self.tempDiffs = [0, 10, 30, 60]
         self.mplPlot = PlotCanvas(parent=self)
 
         ### checkboxes delta T
         deltaTLayout = QVBoxLayout()
+        deltaTLayout.addStretch()
 
         self.toggleButtonHeatfluxComponents = QPushButton("Toggle\nComponents")
         self.toggleButtonHeatfluxComponents.setCheckable(True)
@@ -99,7 +100,6 @@ class TabOutput(QWidget):
             checkBoxTempDiff = QCheckBox(f"{tempDiff} K")
             deltaTLayout.addWidget(checkBoxTempDiff)
             self.checkBoxesTempDiff.append(checkBoxTempDiff)
-        self.checkBoxesTempDiff[1].setChecked(True)
         deltaTLayout.addWidget(self.toggleButtonHeatfluxComponents)
 
         ### slider electrical and thermal resistance
@@ -154,36 +154,35 @@ class TabOutput(QWidget):
 
         manipLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
-        ### mpl plot
-        heatfluxi = self.calcHeatfluxi(self.currentLayoutIndex, self.tempDiffs, 1, 1)
-        self.createPlot(self.currentLayoutIndex)
-
         ### svg
+        svgLayout = QVBoxLayout()
+        self.svgLabel = QLabel("")
+        self.svgLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        svgLayout.addWidget(self.svgLabel)
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
-        self.drawSankeySvg(self.currentLayoutIndex)
+        svgLayout.addWidget(self.svg)
 
         assemblyLayout = QVBoxLayout()
         boxesAndPlotsLayoutContainer = QWidget()
         boxesAndPlotsLayout = QHBoxLayout(boxesAndPlotsLayoutContainer)
         boxesAndPlotsLayout.addLayout(deltaTLayout)
         boxesAndPlotsLayout.addWidget(self.mplPlot)
-        boxesAndPlotsLayout.addWidget(self.svg)
+        boxesAndPlotsLayout.addLayout(svgLayout)
         boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        # assemblyLayout.addLayout(boxesAndPlotsLayout)
         assemblyLayout.addWidget(boxesAndPlotsLayoutContainer)
-        # assemblyLayout.addLayout(manipLayout)
         assemblyLayout.addWidget(manipLayoutContainer)
         self.setLayout(assemblyLayout)
 
     def connect(self):
-        self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+        self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         for box in self.checkBoxesTempDiff:
-            box.stateChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex)) 
-        self.sliderElRes.valueChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
-        self.sliderThermRes.valueChanged.connect(lambda _: self.createPlot(self.currentLayoutIndex))
+            box.stateChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex)) 
+        self.sliderElRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.sliderThermRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.checkBoxesTempDiff[1].setChecked(True)
     
-    def createPlot(self, layoutIndex):
+    def createPlots(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
         tempDiffs = []
         for i, box in enumerate(self.checkBoxesTempDiff):
@@ -192,14 +191,13 @@ class TabOutput(QWidget):
 
         elResFactor = self.sliderElRes.value() / 100
         thermResFactor = self.sliderThermRes.value() / 100
-        self.manipElResMidLabel.setText(f"{elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)")
-        self.manipThermResMidLabel.setText(f"{thermResFactor * 100:.0f} % ({thermResFactor * self.cache['layouts'][self.currentLayoutIndex]['resThermalResistance']:.2f} W/mK)")
-        thermResFactor = self.sliderThermRes.value() / 100
         
         showComponents = self.toggleButtonHeatfluxComponents.isChecked()
 
         heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs, elResFactor, thermResFactor)
         self.mplPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
+        sankeyDict = self.calcSankeyDict(heatfluxiDict, tempDiffs)
+        self.drawSankeySvg(layoutIndex, sankeyDict)
 
     def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
         self.currentLayoutIndex = layoutIndex
@@ -220,6 +218,13 @@ class TabOutput(QWidget):
             P_HeatConducts.append(P_HeatConduct)
             P_Results.append(P_Peltier + 0.5 * P_Joule + P_HeatConduct)
 
+        self.manipElResMidLabel.setText(f"""
+            {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
+        """)
+        self.manipThermResMidLabel.setText(f"""
+            {thermResFactor * 100:.0f} % ({thermResFactor * self.cache['layouts'][self.currentLayoutIndex]['resThermalResistance']:.2f} K/W)
+        """)
+
         return {
             'I': current,
             'P_Joule': P_Joule,
@@ -227,15 +232,35 @@ class TabOutput(QWidget):
             'P_HeatConducts': P_HeatConducts,
             'P_Results': P_Results
         }
+        
+    def calcSankeyDict(self, hfDict, tempDiffs):
+        P_Coldside = max(hfDict['P_Results'][0])
+        maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
+        current = hfDict['I'][maxCSPowerIndex]
+        P_Joule = hfDict['P_Joule'][maxCSPowerIndex]
+        P_HeatConduct = hfDict['P_HeatConducts'][maxCSPowerIndex]
+        P_HeatConduct = hfDict['P_HeatConducts'][maxCSPowerIndex] # TODO!
 
 
-    def drawSankeySvg(self, layoutIndex): 
+        if len(tempDiffs) > 0:
+            self.svgLabel.setText(f"""
+                Heatfluxes visualized\n
+                for ΔT = {tempDiffs[0]} K\n
+                at max. P = {P_Coldside:.1f} W ({current:.1f} A)
+
+            """)
+        else:
+            self.svgLabel.setText(f"""
+            """)
+
+
+    def drawSankeySvg(self, layoutIndex, hfDict): 
         self.currentLayoutIndex = layoutIndex
         layoutName = self.cache['layouts'][layoutIndex]['name']
         svgWidth, svgHeight = 500, 500
-        bgWidth, bgHeight = 250, 250
-        self.svg.setFixedSize(bgWidth, bgHeight)
-        colors = [
+        bgWidth, bgHeight = 0.9 * svgWidth, 0.9 * svgHeight
+        self.svg.setFixedSize(svgWidth, svgHeight)
+        layerCols = [
             (1.0, 0.701, 0.729),   # Pastellrosa
             (1.0, 0.874, 0.729),   # Pastellorange
             (1.0, 1.0, 0.729),     # Pastellgelb
@@ -247,32 +272,56 @@ class TabOutput(QWidget):
             (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
+        hfCols = {
+            'red': (1.0, 0.0, 0.0, 1.0),
+            'green': (0.0, 0.5019607843137255, 0.0, 1.0),
+            'blue': (0.0, 0.0, 1.0, 1.0),
+            'orange': (1.0, 0.6470588235294118, 0.0, 1.0)
+        }
         structure = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
         structureHeight = sum((layer['thickness'] for layer in structure))
         structureArea = max((layer['area'] for layer in structure))
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
-        with cairo.SVGSurface(f"assets/outputSankey_{layoutName}.svg", bgWidth, bgHeight) as surface:
-            context = cairo.Context(surface)
-            cumuThickness = 0
+        with cairo.SVGSurface(f"assets/outputSankey_{layoutName}.svg", svgWidth, svgHeight) as surface:
+            ### draw background
+            ct = cairo.Context(surface)
+            bgStartX = (svgWidth-bgWidth)/2
+            bgStartY = (svgHeight-bgHeight)/2
+            cumuThickness = bgStartY
             for i, layer in enumerate(structure):
-                r = colors[i%len(colors)][0]
-                g = colors[i%len(colors)][1]
-                b = colors[i%len(colors)][2]
-                context.set_source_rgba(r, g, b, 0.1)
+                r = layerCols[i%len(layerCols)][0]
+                g = layerCols[i%len(layerCols)][1]
+                b = layerCols[i%len(layerCols)][2]
+                ct.set_source_rgba(r, g, b, 0.2)
                 height = layer['thickness'] / structureHeight * bgHeight
-                if layer['area'] == structureArea:
-                    context.rectangle(0, cumuThickness, bgWidth, height)
-                else:
+                if layer['area'] == structureArea: # full rectangle
+                    ct.rectangle(bgStartX, cumuThickness, bgWidth, height)
+                else: # stripes
                     coverage = (layer['area'] / structureArea)**(1/2)
                     nStripes = 5
                     coveredArea = coverage * bgWidth
                     blankArea = (1-coverage) * bgWidth
                     stripeWidth = coveredArea / (nStripes + 1)
                     gapWidth = blankArea / nStripes 
-                    x = (gapWidth + stripeWidth) / 2
+                    x = bgStartX + (gapWidth + stripeWidth) / 2
                     for i in range(nStripes):
-                        context.rectangle(x, cumuThickness, stripeWidth, height)
+                        ct.rectangle(x, cumuThickness, stripeWidth, height)
                         x += (stripeWidth + gapWidth)
                 cumuThickness += height
-                context.fill()
+                ct.fill()
+            
+            ### draw foreground
+            # variables
+            hfTotalWidth = 0.9 * bgWidth
+            # hfResWidth = (hfDict['P_Results'][0] + hfDict['P_Peltier'])
+
+
+            # P_Res
+            # ct.set_source_rgba(*hfCols['green'])
+            # ct.move_to(svgWidth*0.5 + 20, svgHeight)
+            # ct.line_to(svgWidth*0.5 + 20, svgHeight-bgHeight + 20)
+            # ct.set_line_width()
+            # ct.stroke()
+
+
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
