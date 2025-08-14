@@ -59,12 +59,12 @@ class PlotCanvas(FigureCanvas): # TODO: better colors, better heatconduct sankey
             self.ax.plot(I, P_Ress[2], label=f"$P_{{Res}}$($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
             self.ax.plot(I, P_Ress[3], label=f"$P_{{Res}}$($\Delta$T={dTs[3]} K)", c='green', lw=2, ls='-.')
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
-                self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
+                    self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
+                    self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
+                    self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                    self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                    self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+                    self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
 
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
@@ -263,6 +263,20 @@ class TabOutput(QWidget):
 
 
     def drawSankeySvg(self, layoutIndex, hfDict):
+        def createText(context, text, centerx, centery):
+            context.save()
+            (x, y, width, height, dx, dy) = context.text_extents(text)
+            textPosx = centerx - width/2 - x 
+            textPosy = centery - height/2 - y
+            context.set_source_rgba(*hfCols['bgText'])
+            context.rectangle(textPosx-2, textPosy-height-3, width+7, height+8)
+            context.fill()
+            context.set_source_rgba(*hfCols['text'])
+            context.move_to(textPosx, textPosy)
+            context.show_text(text)
+            context.restore()
+            context.new_path()
+
         self.currentLayoutIndex = layoutIndex
         layoutName = self.cache['layouts'][layoutIndex]['name']
         svgWidth, svgHeight = 500, 500
@@ -281,6 +295,8 @@ class TabOutput(QWidget):
             (1.0, 0.8, 0.898)      # Zartes Rosa
         ]
         hfCols = {
+            'bgText': (1.0, 1.0, 1.0, 0.3),
+            'text': (0.0, 0.0, 0.0, 1.0),
             'endBlock': (0.0, 0.0, 0.0, 0.7), # black
             'heatConduct': (1.0, 0.0, 0.0, 0.7), # red
             'coldside': (0.0, 0.5019607843137255, 0.0, 0.7), # green
@@ -295,6 +311,8 @@ class TabOutput(QWidget):
         with cairo.SVGSurface(f"assets/outputSankey_{layoutName}.svg", svgWidth, svgHeight) as surface:
             ### draw background
             ct = cairo.Context(surface)
+            ct.select_font_face('Sans', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            ct.set_font_size(12)
             bgStartx = (svgWidth-bgWidth)/2
             bgStarty = (svgHeight-bgHeight)/2
             cumuThickness = bgStarty
@@ -320,105 +338,114 @@ class TabOutput(QWidget):
                 cumuThickness += height
                 ct.fill()
             
-            ### draw foreground
+            ### draw heatfluxi
             # > 0 check
-            for val in hfDict.values():
-                if val < 0:
-                    return
+            if any([val<0 for val in hfDict.values()]):
+                createText(ct, f"Error: negative Heatflux values", svgWidth/2, svgHeight/2)
+            else:
+                # variables
+                margin = 20
+                hfStartx = bgStartx + margin
+                hfStarty = bgStarty + margin
+                hfEndx = bgStartx + bgWidth - margin
+                hfEndy = bgStarty + bgHeight - margin
+                hfMidx = (hfEndx + hfStartx)/2
+                hfMidy = (hfEndy + hfStarty)/2
 
-            # variables
-            margin = 20
-            hfStartx = bgStartx + margin
-            hfStarty = bgStarty + margin
-            hfEndx = bgStartx + bgWidth - margin
-            hfEndy = bgStarty + bgHeight - margin
-            hfMidx = (hfEndx + hfStartx)/2
-            hfMidy = (hfEndy + hfStarty)/2
+                hfPixelRatio = (bgWidth - 8 * margin) / (hfDict['P_Hotside'] + hfDict['P_HeatConduct'])
+                PHotSideWidth = hfDict['P_Hotside'] * hfPixelRatio
+                PJouleWidth = hfDict['P_Joule'] * hfPixelRatio
+                PColdsideWidth = hfDict['P_Coldside'] * hfPixelRatio
+                PHeatConductWidth = hfDict['P_HeatConduct'] * hfPixelRatio
+                PPeltierWidth = hfDict['P_Peltier'] * hfPixelRatio
 
-            hfPixelRatio = (bgWidth - 8 * margin) / (hfDict['P_Hotside'] + hfDict['P_HeatConduct'])
-            PHotSideWidth = hfDict['P_Hotside'] * hfPixelRatio
-            PJouleWidth = hfDict['P_Joule'] * hfPixelRatio
-            PColdsideWidth = hfDict['P_Coldside'] * hfPixelRatio
-            PHeatConductWidth = hfDict['P_HeatConduct'] * hfPixelRatio
-            PPeltierWidth = hfDict['P_Peltier'] * hfPixelRatio
+                PHotSideAndHeatConductWidth = PHotSideWidth + PHeatConductWidth
 
-            PHotSideAndHeatConductWidth = PHotSideWidth + PHeatConductWidth
+                # Heatconduct line
+                heatConductX = hfMidx+((PHotSideAndHeatConductWidth)/2)-PHeatConductWidth/2
+                ct.set_source_rgba(*hfCols['heatConduct'])
+                ct.set_line_width(PHeatConductWidth)
+                ct.move_to(heatConductX, hfEndy-margin)
+                ct.line_to(heatConductX, hfStarty+margin)
+                ct.stroke()
+                # Heatconduct start and end block
+                ct.set_source_rgba(*hfCols['endBlock'])
+                ct.move_to(heatConductX, hfEndy)
+                ct.line_to(heatConductX, hfEndy-margin)
+                ct.stroke()
+                ct.move_to(heatConductX, hfStarty)
+                ct.line_to(heatConductX, hfStarty+margin)
+                ct.stroke()
+                
 
-            # Heatconduct line
-            heatConductX = hfMidx+((PHotSideAndHeatConductWidth)/2)-PHeatConductWidth/2
-            ct.set_source_rgba(*hfCols['heatConduct'])
-            ct.set_line_width(PHeatConductWidth)
-            ct.move_to(heatConductX, hfEndy-margin)
-            ct.line_to(heatConductX, hfStarty+margin)
-            ct.stroke()
-            # Heatconduct start and end block
-            ct.set_source_rgba(*hfCols['endBlock'])
-            ct.move_to(heatConductX, hfEndy)
-            ct.line_to(heatConductX, hfEndy-margin)
-            ct.stroke()
-            ct.move_to(heatConductX, hfStarty)
-            ct.line_to(heatConductX, hfStarty+margin)
-            ct.stroke()
-            
+                # Joule start line
+                ct.set_source_rgba(*hfCols['joule'])
+                ct.set_line_width(PJouleWidth)
+                ct.move_to(0, svgHeight/2)
+                ct.line_to(hfStartx, svgHeight/2)
+                ct.stroke()
 
-            # Joule start line
-            ct.set_source_rgba(*hfCols['joule'])
-            ct.set_line_width(PJouleWidth)
-            ct.move_to(0, svgHeight/2)
-            ct.line_to(hfStartx, svgHeight/2)
-            ct.stroke()
+                # Joule-Hotside-arc
+                ct.set_line_width(PJouleWidth/2)
+                ct.set_source_rgba(*hfCols['joule'])
+                ct.save()
+                ct.translate(hfStartx, hfStarty+margin)
+                scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth/4) - hfStartx
+                scaley = (hfMidy - PJouleWidth/4) - (hfStarty + margin) 
+                ct.scale(scalex, scaley)
+                ct.arc(0.0, 0.0, 1.0, 0, 0.5*np.pi)
+                ct.restore()
+                ct.stroke()
 
-            # Joule-Hotside-arc
-            ct.set_line_width(PJouleWidth/2)
-            ct.save()
-            ct.translate(hfStartx, hfStarty+margin)
-            scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth/4) - hfStartx
-            scaley = (hfMidy - PJouleWidth/4) - (hfStarty + margin) 
-            ct.scale(scalex, scaley)
-            ct.arc(0.0, 0.0, 1.0, 0, 0.5*np.pi)
-            ct.restore()
-            ct.stroke()
+                # Joule-Coldside endblock
+                ct.set_source_rgba(*hfCols['endBlock'])
+                ct.move_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy)
+                ct.line_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy-margin)
+                ct.stroke()
 
-            # Joule-Coldside endblock
-            ct.set_source_rgba(*hfCols['endBlock'])
-            ct.move_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy)
-            ct.line_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy-margin)
-            ct.stroke()
+                # Coldside start line
+                ct.set_source_rgba(*hfCols['coldside'])
+                ct.set_line_width(PColdsideWidth)
+                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, hfEndy-margin)
+                ct.stroke()
 
-            # Coldside start line
-            ct.set_source_rgba(*hfCols['coldside'])
-            ct.set_line_width(PColdsideWidth)
-            ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight)
-            ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, hfEndy-margin)
-            ct.stroke()
+                # HotSide End Line
+                ct.set_source_rgba(*hfCols['hotside'])
+                ct.set_line_width(PHotSideWidth)
+                ct.move_to(hfMidx - PHeatConductWidth/2, hfStarty+margin)
+                ct.line_to(hfMidx - PHeatConductWidth/2, 0)
+                ct.stroke()
 
-            # HotSide End Line
-            ct.set_source_rgba(*hfCols['hotside'])
-            ct.set_line_width(PHotSideWidth)
-            ct.move_to(hfMidx - PHeatConductWidth/2, hfStarty+margin)
-            ct.line_to(hfMidx - PHeatConductWidth/2, 0)
-            ct.stroke()
+                # Peltier Line
+                ct.set_source_rgba(*hfCols['peltier'])
+                ct.set_line_width(PPeltierWidth)
+                ct.move_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfEndy-margin)
+                ct.line_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfStarty+margin)
+                ct.stroke()
 
-            # Peltier Line
-            ct.set_source_rgba(*hfCols['peltier'])
-            ct.set_line_width(PPeltierWidth)
-            ct.move_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfEndy-margin)
-            ct.line_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfStarty+margin)
-            ct.stroke()
+                # Joule-Coldside-arc
+                ct.set_line_width(PJouleWidth/2)
+                ct.set_source_rgba(*hfCols['joule'])
+                ct.save()
+                ct.translate(hfStartx, hfEndy-margin)
+                scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth * 3/4) - hfStartx
+                scaley = (hfEndy - margin) - (hfMidy + PJouleWidth/4)
+                ct.scale(scalex, scaley)
+                ct.arc(0.0, 0.0, 1.0, 1.5*np.pi, 2*np.pi)
+                ct.restore()
+                ct.stroke()
 
-            # Joule-Coldside-arc
-            ct.set_line_width(PJouleWidth/2)
-            ct.set_source_rgba(*hfCols['joule'])
-            ct.save()
-            ct.translate(hfStartx, hfEndy-margin)
-            scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth * 3/4) - hfStartx
-            scaley = (hfEndy - margin) - (hfMidy + PJouleWidth/4)
-            ct.scale(scalex, scaley)
-            ct.arc(0.0, 0.0, 1.0, 1.5*np.pi, 2*np.pi)
-            ct.restore()
-            ct.stroke()
-
-
-
+                # labels
+                createText(ct, f"P_ J ({hfDict['P_Joule']:.0f} W)", 40, svgHeight/2)
+                createText(ct, f"P_HS ({hfDict['P_Hotside']:.0f} W)", hfMidx - PHeatConductWidth/2, 30)
+                createText(ct, f"P_CS ({hfDict['P_Coldside']:.0f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
+                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.0f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
+                ct.set_line_width(5)
+                ct.set_source_rgba(*hfCols['bgText'])
+                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 - PPeltierWidth/2, svgHeight/2-19)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 + PPeltierWidth/2, svgHeight/2-19)
+                ct.stroke()
+                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.0f} W)", heatConductX+35, svgHeight/2+30)
 
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
