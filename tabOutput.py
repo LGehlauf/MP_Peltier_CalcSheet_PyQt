@@ -12,7 +12,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 
-class PlotCanvas(FigureCanvas): # TODO: better colors, better heatconduct sankey visualization, labels in sankey
+class PlotCanvas(FigureCanvas):  
     def __init__(self, parent=None):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
@@ -27,49 +27,64 @@ class PlotCanvas(FigureCanvas): # TODO: better colors, better heatconduct sankey
         P_J = heatfluxi['P_Joule']
         P_Ls = heatfluxi['P_HeatConducts']
         if len(dTs) == 1:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=2)
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
 
         elif len(dTs) == 2:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
 
         elif len(dTs) == 3:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
-            self.ax.plot(I, P_Ress[2], label=f"$P_{{Res}}$($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='orange', lw=1)
+                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
 
         elif len(dTs) == 4:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{Res}}$($\Delta$T={dTs[0]} K)", c='green', lw=2)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{Res}}$($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
-            self.ax.plot(I, P_Ress[2], label=f"$P_{{Res}}$($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
-            self.ax.plot(I, P_Ress[3], label=f"$P_{{Res}}$($\Delta$T={dTs[3]} K)", c='green', lw=2, ls='-.')
+            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=2)
+            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=2, ls='--')
+            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=2, ls=':')
+            self.ax.plot(I, P_Ress[3], label=f"$P_{{CS}}$ ($\Delta$T={dTs[3]} K)", c='green', lw=2, ls='-.')
             if showComponents:
-                    self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
-                    self.ax.plot(I, P_J, label=f"$P_{{J}}$($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
-                    self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                    self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                    self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
-                    self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
+                    self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
+                    self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
+                    self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
+                    self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
+                    self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+                    self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
 
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
         self.ax.grid()
         self.ax.legend()
+        self.draw()
+
+    def plot_I_COP(self, heatfluxi, dTs):
+        self.ax.clear()
+        cop = []
+        linetypes = ['-', '--', ':', '-.']
+        for i, res in enumerate(heatfluxi['P_Results']):
+            cop.append(res/ -heatfluxi['P_Joule'])
+            self.ax.plot(heatfluxi['I'], cop[i], label=f"COP ($\Delta$T={dTs[i]} K)", c='black', lw=2, ls=linetypes[i])
+
+        self.ax.set_xlabel("I [A]")
+        self.ax.set_ylabel("COP")
+        self.ax.grid()
+        self.ax.legend()
+        self.ax.set_ylim(0, 3)
         self.draw()
 
 class TabOutput(QWidget):
@@ -83,7 +98,8 @@ class TabOutput(QWidget):
     
     def init(self):
         self.tempDiffs = [0, 10, 30, 60]
-        self.mplPlot = PlotCanvas(parent=self)
+        self.hfPlot = PlotCanvas(parent=self)
+        self.copPlot = PlotCanvas(parent=self)
 
         ### checkboxes delta T
         deltaTLayout = QVBoxLayout()
@@ -167,7 +183,8 @@ class TabOutput(QWidget):
         boxesAndPlotsLayoutContainer = QWidget()
         boxesAndPlotsLayout = QHBoxLayout(boxesAndPlotsLayoutContainer)
         boxesAndPlotsLayout.addLayout(deltaTLayout)
-        boxesAndPlotsLayout.addWidget(self.mplPlot)
+        boxesAndPlotsLayout.addWidget(self.copPlot)
+        boxesAndPlotsLayout.addWidget(self.hfPlot)
         boxesAndPlotsLayout.addLayout(svgLayout)
         boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         assemblyLayout.addWidget(boxesAndPlotsLayoutContainer)
@@ -195,7 +212,8 @@ class TabOutput(QWidget):
         showComponents = self.toggleButtonHeatfluxComponents.isChecked()
 
         heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs, elResFactor, thermResFactor)
-        self.mplPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
+        self.hfPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
+        self.copPlot.plot_I_COP(heatfluxiDict, tempDiffs)
         sankeyDict = self.calcSankeyDict(heatfluxiDict, tempDiffs)
         self.drawSankeySvg(layoutIndex, sankeyDict)
 
@@ -262,7 +280,7 @@ class TabOutput(QWidget):
         }
 
 
-    def drawSankeySvg(self, layoutIndex, hfDict):
+    def drawSankeySvg(self, layoutIndex, hfDict): # TODO: sankey for max cs power/ max cop, also global legend
         def createText(context, text, centerx, centery):
             context.save()
             (x, y, width, height, dx, dy) = context.text_extents(text)
@@ -437,15 +455,15 @@ class TabOutput(QWidget):
                 ct.stroke()
 
                 # labels
-                createText(ct, f"P_ J ({hfDict['P_Joule']:.0f} W)", 40, svgHeight/2)
-                createText(ct, f"P_HS ({hfDict['P_Hotside']:.0f} W)", hfMidx - PHeatConductWidth/2, 30)
-                createText(ct, f"P_CS ({hfDict['P_Coldside']:.0f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
-                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.0f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
+                createText(ct, f"P_ J ({hfDict['P_Joule']:.1f} W)", 40, svgHeight/2)
+                createText(ct, f"P_HS ({hfDict['P_Hotside']:.1f} W)", hfMidx - PHeatConductWidth/2, 30)
+                createText(ct, f"P_CS ({hfDict['P_Coldside']:.1f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
+                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.1f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
                 ct.set_line_width(5)
                 ct.set_source_rgba(*hfCols['bgText'])
                 ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 - PPeltierWidth/2, svgHeight/2-19)
                 ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 + PPeltierWidth/2, svgHeight/2-19)
                 ct.stroke()
-                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.0f} W)", heatConductX+35, svgHeight/2+30)
+                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.1f} W)", heatConductX+35, svgHeight/2+30)
 
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
