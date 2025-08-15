@@ -12,12 +12,15 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 
-class PlotCanvas(FigureCanvas):  
+class PlotCanvas(FigureCanvas):  # TODO: nicer colors, global legend
     def __init__(self, parent=None):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
+        self.fig.patch.set_alpha(0.0)
+        self.fig.tight_layout()
+        self.ax.set_facecolor((1,1,1,0))
 
     def plot_I_P(self, heatfluxi, dTs, showComponents):
         self.ax.clear()
@@ -70,6 +73,7 @@ class PlotCanvas(FigureCanvas):
         self.ax.set_ylabel("P [W]")
         self.ax.grid()
         self.ax.legend()
+        self.ax.set_title("Heatfluxes")
         self.draw()
 
     def plot_I_COP(self, heatfluxi, dTs):
@@ -78,13 +82,14 @@ class PlotCanvas(FigureCanvas):
         linetypes = ['-', '--', ':', '-.']
         for i, res in enumerate(heatfluxi['COPs']):
             # cop.append(res/ -heatfluxi['P_Joule'])
-            self.ax.plot(heatfluxi['I'], heatfluxi['COPs'][i], label=f"COP ($\Delta$T={dTs[i]} K)", c='black', lw=2, ls=linetypes[i])
+            self.ax.plot(heatfluxi['I'], heatfluxi['COPs'][i], label=f"$\Delta$T={dTs[i]} K", c='black', lw=2, ls=linetypes[i])
 
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("COP")
         self.ax.grid()
         self.ax.legend()
-        self.ax.set_ylim(0, 3)
+        self.ax.set_ylim(0, 6)
+        self.ax.set_title("Coefficient of Performance (COP)")
         self.draw()
 
 class TabOutput(QWidget):
@@ -99,7 +104,9 @@ class TabOutput(QWidget):
     def init(self):
         self.tempDiffs = [0, 10, 30, 60]
         self.hfPlot = PlotCanvas(parent=self)
+        self.hfPlot.setStyleSheet("background: transparent;")
         self.copPlot = PlotCanvas(parent=self)
+        self.copPlot.setStyleSheet("background: transparent;")
 
         ### checkboxes delta T
         deltaTLayout = QVBoxLayout()
@@ -172,12 +179,12 @@ class TabOutput(QWidget):
 
         ### svg
         sankeyLayout = QVBoxLayout()
-        self.sankeyLabel = QLabel("Sankey-Heatflux Diagram")
+        self.sankeyLabel = QLabel("")
         self.sankeyLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.sankeyMaxPowButton = QPushButton("Max. Power")
+        self.sankeyMaxPowButton = QPushButton("")
         self.sankeyMaxPowButton.setCheckable(True)
         self.sankeyMaxPowButton.setChecked(True)
-        self.sankeyMaxCopButton = QPushButton("Max. COP")
+        self.sankeyMaxCopButton = QPushButton("")
         self.sankeyMaxCopButton.setCheckable(True)
         buttonGroupLayout = QHBoxLayout()
         buttonGroup = QButtonGroup(self)
@@ -198,8 +205,8 @@ class TabOutput(QWidget):
         boxesAndPlotsLayoutContainer = QWidget()
         boxesAndPlotsLayout = QHBoxLayout(boxesAndPlotsLayoutContainer)
         boxesAndPlotsLayout.addLayout(deltaTLayout)
-        boxesAndPlotsLayout.addWidget(self.copPlot)
         boxesAndPlotsLayout.addWidget(self.hfPlot)
+        boxesAndPlotsLayout.addWidget(self.copPlot)
         boxesAndPlotsLayout.addLayout(sankeyLayout)
         boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         assemblyLayout.addWidget(boxesAndPlotsLayoutContainer)
@@ -237,7 +244,7 @@ class TabOutput(QWidget):
     def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
-        current = np.linspace(0, 6, 100)
+        current = np.linspace(0, 6, 30)
         resPeltierCoefficient = (
             layout['combinedSeebeckCoefficient']/1000/1000 # µV/K -> V/K
             * layout['numberOfElectricalRepetitions'] 
@@ -249,12 +256,12 @@ class TabOutput(QWidget):
         P_Results = []
         COPs = []
         for tempDiff in tempDiffs:
-            npTempDiff = np.linspace(tempDiff, tempDiff, 100)
+            npTempDiff = np.linspace(tempDiff, tempDiff, 30)
             P_HeatConduct = - npTempDiff / (layout['resThermalResistance'] * thermResFactor)
             P_HeatConducts.append(P_HeatConduct)
             P_Res = P_Peltier + 0.5 * P_Joule + P_HeatConduct
             P_Results.append(P_Res)
-            COPs.append(P_Res/ -P_Joule)
+            COPs.append(np.divide(P_Res, -P_Joule, out=np.zeros_like(P_Res), where=P_Joule!=0))
 
         self.manipElResMidLabel.setText(f"""
             {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
@@ -273,30 +280,39 @@ class TabOutput(QWidget):
         }
         
     def calcSankeyDict(self, hfDict, tempDiffs, maxPowerBool):
-        if maxPowerBool:
-            P_Coldside = max(hfDict['P_Results'][0])
-            maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
-            current = hfDict['I'][maxCSPowerIndex]
-            P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
-            P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
-            P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
-            P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
-        else:
+        if len(tempDiffs) > 0:
+            maxCOP = max(hfDict['COPs'][0])
             maxCOPIndex = np.argmax(hfDict['COPs'][0])
-            P_Coldside = hfDict['P_Results'][maxCOPIndex] # TODO: here is p_coldside???
-            current = hfDict['I'][maxCOPIndex]
-            P_Joule = - hfDict['P_Joule'][maxCOPIndex]
-            P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCOPIndex]
-            P_Peltier = hfDict['P_Peltier'][maxCOPIndex] 
+            currentMaxCOP = hfDict['I'][maxCOPIndex]
+
+            maxCSPower = max(hfDict['P_Results'][0])
+            maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
+            currentMaxCSPower = hfDict['I'][maxCSPowerIndex]
+
+            if maxPowerBool:
+                P_Coldside = maxCSPower
+                P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
+                P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
+                P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
+
+            else:
+                P_Coldside = hfDict['P_Results'][0][maxCOPIndex] 
+                P_Joule = - hfDict['P_Joule'][maxCOPIndex]
+                P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCOPIndex]
+                P_Peltier = hfDict['P_Peltier'][maxCOPIndex] 
+
             P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
 
-        # if len(tempDiffs) > 0:
-        #     self.sankeyLabel.setText(f"""
-        #         Sankey-Heatflux Diagram for ΔT = {tempDiffs[0]} K
-        #     """)
-        # else:
-        #     self.sankeyLabel.setText(f"""
-        #     """)
+            self.sankeyMaxCopButton.setText(f"\nMax. COP ({maxCOP:.1f})\nI = {currentMaxCOP:.2f} A\n")
+            self.sankeyMaxPowButton.setText(f"\nMax. Coldside Heatflux ({maxCSPower:.1f} W)\nI = {currentMaxCSPower:.1f} A\n")
+
+            self.sankeyLabel.setText(f"""
+                Sankey-Heatflux Diagram for ΔT = {tempDiffs[0]} K
+            """)
+
+        else:
+            self.sankeyLabel.setText(f"Sankey-Heatflux Diagram")
+            return {}
 
         return {
             'P_Hotside': P_Hotside,
@@ -307,7 +323,7 @@ class TabOutput(QWidget):
         }
 
 
-    def drawSankeySvg(self, layoutIndex, hfDict): # TODO: sankey for max cs power/ max cop, also global legend
+    def drawSankeySvg(self, layoutIndex, hfDict): 
         def createText(context, text, centerx, centery):
             context.save()
             (x, y, width, height, dx, dy) = context.text_extents(text)
@@ -387,6 +403,8 @@ class TabOutput(QWidget):
             # > 0 check
             if any([val<0 for val in hfDict.values()]):
                 createText(ct, f"Error: negative Heatflux values", svgWidth/2, svgHeight/2)
+            elif len(hfDict) == 0:
+                createText(ct, f"Choose ΔT", svgWidth/2, svgHeight/2)
             else:
                 # variables
                 margin = 20
