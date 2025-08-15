@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QTableWidget,
     QTableWidgetItem, QMenu, QLabel, QHeaderView,
-    QCheckBox, QSizePolicy, QSlider
+    QCheckBox, QSizePolicy, QSlider, QButtonGroup
 )
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
@@ -74,11 +74,11 @@ class PlotCanvas(FigureCanvas):
 
     def plot_I_COP(self, heatfluxi, dTs):
         self.ax.clear()
-        cop = []
+        # cop = []
         linetypes = ['-', '--', ':', '-.']
-        for i, res in enumerate(heatfluxi['P_Results']):
-            cop.append(res/ -heatfluxi['P_Joule'])
-            self.ax.plot(heatfluxi['I'], cop[i], label=f"COP ($\Delta$T={dTs[i]} K)", c='black', lw=2, ls=linetypes[i])
+        for i, res in enumerate(heatfluxi['COPs']):
+            # cop.append(res/ -heatfluxi['P_Joule'])
+            self.ax.plot(heatfluxi['I'], heatfluxi['COPs'][i], label=f"COP ($\Delta$T={dTs[i]} K)", c='black', lw=2, ls=linetypes[i])
 
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("COP")
@@ -171,21 +171,36 @@ class TabOutput(QWidget):
         manipLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         ### svg
-        svgLayout = QVBoxLayout()
-        self.svgLabel = QLabel("")
-        self.svgLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        svgLayout.addWidget(self.svgLabel)
+        sankeyLayout = QVBoxLayout()
+        self.sankeyLabel = QLabel("Sankey-Heatflux Diagram")
+        self.sankeyLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.sankeyMaxPowButton = QPushButton("Max. Power")
+        self.sankeyMaxPowButton.setCheckable(True)
+        self.sankeyMaxPowButton.setChecked(True)
+        self.sankeyMaxCopButton = QPushButton("Max. COP")
+        self.sankeyMaxCopButton.setCheckable(True)
+        buttonGroupLayout = QHBoxLayout()
+        buttonGroup = QButtonGroup(self)
+        buttonGroup.setExclusive(True)
+        buttonGroup.addButton(self.sankeyMaxPowButton)
+        buttonGroup.addButton(self.sankeyMaxCopButton)
+
+        sankeyLayout.addWidget(self.sankeyLabel)
+        buttonGroupLayout.addWidget(self.sankeyMaxPowButton)
+        buttonGroupLayout.addWidget(self.sankeyMaxCopButton)
+        sankeyLayout.addLayout(buttonGroupLayout)
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
-        svgLayout.addWidget(self.svg)
+        sankeyLayout.addWidget(self.svg)
 
+        ### assembly
         assemblyLayout = QVBoxLayout()
         boxesAndPlotsLayoutContainer = QWidget()
         boxesAndPlotsLayout = QHBoxLayout(boxesAndPlotsLayoutContainer)
         boxesAndPlotsLayout.addLayout(deltaTLayout)
         boxesAndPlotsLayout.addWidget(self.copPlot)
         boxesAndPlotsLayout.addWidget(self.hfPlot)
-        boxesAndPlotsLayout.addLayout(svgLayout)
+        boxesAndPlotsLayout.addLayout(sankeyLayout)
         boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         assemblyLayout.addWidget(boxesAndPlotsLayoutContainer)
         assemblyLayout.addWidget(manipLayoutContainer)
@@ -195,6 +210,7 @@ class TabOutput(QWidget):
         self.toggleButtonHeatfluxComponents.toggled.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         for box in self.checkBoxesTempDiff:
             box.stateChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex)) 
+        self.sankeyMaxPowButton.toggled.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.sliderElRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.sliderThermRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.checkBoxesTempDiff[1].setChecked(True)
@@ -205,6 +221,7 @@ class TabOutput(QWidget):
         for i, box in enumerate(self.checkBoxesTempDiff):
             if box.isChecked():
                 tempDiffs.append(self.tempDiffs[i])
+        maxPowerBool = self.sankeyMaxPowButton.isChecked()
 
         elResFactor = self.sliderElRes.value() / 100
         thermResFactor = self.sliderThermRes.value() / 100
@@ -214,7 +231,7 @@ class TabOutput(QWidget):
         heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs, elResFactor, thermResFactor)
         self.hfPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
         self.copPlot.plot_I_COP(heatfluxiDict, tempDiffs)
-        sankeyDict = self.calcSankeyDict(heatfluxiDict, tempDiffs)
+        sankeyDict = self.calcSankeyDict(heatfluxiDict, tempDiffs, maxPowerBool)
         self.drawSankeySvg(layoutIndex, sankeyDict)
 
     def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
@@ -230,11 +247,14 @@ class TabOutput(QWidget):
         P_Joule = - current * current * layout['resElectricalResistance'] * elResFactor
         P_HeatConducts = []
         P_Results = []
+        COPs = []
         for tempDiff in tempDiffs:
             npTempDiff = np.linspace(tempDiff, tempDiff, 100)
             P_HeatConduct = - npTempDiff / (layout['resThermalResistance'] * thermResFactor)
             P_HeatConducts.append(P_HeatConduct)
-            P_Results.append(P_Peltier + 0.5 * P_Joule + P_HeatConduct)
+            P_Res = P_Peltier + 0.5 * P_Joule + P_HeatConduct
+            P_Results.append(P_Res)
+            COPs.append(P_Res/ -P_Joule)
 
         self.manipElResMidLabel.setText(f"""
             {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
@@ -248,28 +268,35 @@ class TabOutput(QWidget):
             'P_Joule': P_Joule,
             'P_Peltier': P_Peltier,
             'P_HeatConducts': P_HeatConducts,
-            'P_Results': P_Results
+            'P_Results': P_Results,
+            'COPs': COPs
         }
         
-    def calcSankeyDict(self, hfDict, tempDiffs):
-        P_Coldside = max(hfDict['P_Results'][0])
-        maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
-        current = hfDict['I'][maxCSPowerIndex]
-        P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
-        P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
-        P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
-        P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
-
-        if len(tempDiffs) > 0:
-            self.svgLabel.setText(f"""
-                Heatfluxes visualized\n
-                for ΔT = {tempDiffs[0]} K\n
-                at max. P = {P_Coldside:.1f} W ({current:.1f} A)
-
-            """)
+    def calcSankeyDict(self, hfDict, tempDiffs, maxPowerBool):
+        if maxPowerBool:
+            P_Coldside = max(hfDict['P_Results'][0])
+            maxCSPowerIndex = np.argmax(hfDict['P_Results'][0])
+            current = hfDict['I'][maxCSPowerIndex]
+            P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
+            P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
+            P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
+            P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
         else:
-            self.svgLabel.setText(f"""
-            """)
+            maxCOPIndex = np.argmax(hfDict['COPs'][0])
+            P_Coldside = hfDict['P_Results'][maxCOPIndex] # TODO: here is p_coldside???
+            current = hfDict['I'][maxCOPIndex]
+            P_Joule = - hfDict['P_Joule'][maxCOPIndex]
+            P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCOPIndex]
+            P_Peltier = hfDict['P_Peltier'][maxCOPIndex] 
+            P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
+
+        # if len(tempDiffs) > 0:
+        #     self.sankeyLabel.setText(f"""
+        #         Sankey-Heatflux Diagram for ΔT = {tempDiffs[0]} K
+        #     """)
+        # else:
+        #     self.sankeyLabel.setText(f"""
+        #     """)
 
         return {
             'P_Hotside': P_Hotside,
