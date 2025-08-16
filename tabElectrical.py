@@ -9,6 +9,7 @@ from PyQt6.QtGui import QAction
 class TabElectrical(QWidget):
     def __init__(self, cache):
         super().__init__()
+        self.setStyleSheet("QLineEdit { color: white; }")
         self.cache = cache
         self.currentLayoutIndex = 0
 

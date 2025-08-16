@@ -11,6 +11,7 @@ import cairo
 class TabThermal(QWidget):
     def __init__(self, cache):
         super().__init__()
+        self.setStyleSheet("QLineEdit { color: white; }")
         self.cache = cache
         self.currentLayoutIndex = 0
         self.resThermConductCoeff = 0
