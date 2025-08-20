@@ -72,7 +72,7 @@
             "resThermalResistance": 5.3272719655886736
         },
         {
-            "name": "tec-12706-with-PEDOT",
+            "name": "tec-12706-with-PEDOT in-plane",
             "thermalStructure": [
                 {
                     "material": "AlO",
@@ -93,10 +93,10 @@
                     "thermalConductivity": 1.2
                 },
                 {
-                    "material": "PEDOT",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 0.3 
+                    "material": "PEDOT-in-plane",
+                    "area": 200,
+                    "thickness": 1.25,
+                    "thermalConductivity": 1.2 
                 },
                 {
                     "material": "BiTe-p",
@@ -131,10 +131,10 @@
                     "specElResistance": 1.984e-05
                 },
                 {
-                    "material": "PEDOT",
-                    "crossSection": 1.5625,
-                    "length": 0.1,
-                    "specElResistance": 1.0e-05
+                    "material": "PEDOT-in-plane",
+                    "crossSection": 0.125,
+                    "length": 1.25,
+                    "specElResistance": 3.6e-05
                 },
                 {
                     "material": "BiTe-p",
@@ -155,28 +155,58 @@
             "resThermalResistance": 5.3272719655886736
         },
         {
-            "name": "PEDOT-Funktionsmuster",
+            "name": "tec-12706-with-PEDOT through-plane",
             "thermalStructure": [
                 {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401
+                },
+                {
                     "material": "BiTe-n",
-                    "area": 1.5625,
+                    "area": 393.75,
                     "thickness": 1.25,
                     "thermalConductivity": 1.2
                 },
                 {
-                    "material": "PEDOT",
-                    "area": 1.5625,
+                    "material": "PEDOT-through-plane",
+                    "area": 393.75,
                     "thickness": 0.1,
                     "thermalConductivity": 0.3 
                 },
                 {
                     "material": "BiTe-p",
-                    "area": 1.5625,
+                    "area": 393.75,
                     "thickness": 1.25,
                     "thermalConductivity": 1.2
+                },
+                {
+                    "material": "Cu",
+                    "area": 393.75,
+                    "thickness": 0.1,
+                    "thermalConductivity": 401
+                },
+                {
+                    "material": "AlO",
+                    "area": 1600,
+                    "thickness": 0.7,
+                    "thermalConductivity": 25
                 }
             ],
             "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 0.125,
+                    "length": 1.25,
+                    "specElResistance": 1.68e-08
+                },
                 {
                     "material": "BiTe-n",
                     "crossSection": 1.5625,
@@ -184,19 +214,25 @@
                     "specElResistance": 1.984e-05
                 },
                 {
-                    "material": "PEDOT",
+                    "material": "PEDOT-through-plane",
                     "crossSection": 1.5625,
                     "length": 0.1,
-                    "specElResistance": 1.0e-05
+                    "specElResistance": 8.07e3 
                 },
                 {
                     "material": "BiTe-p",
                     "crossSection": 1.5625,
                     "length": 1.25,
                     "specElResistance": 1.984e-05
+                },
+                {
+                    "material": "Cu",
+                    "crossSection": 0.125,
+                    "length": 1.25,
+                    "specElResistance": 1.68e-08
                 }
             ],
-            "numberOfElectricalRepetitions": 1,
+            "numberOfElectricalRepetitions": 126,
             "combinedSeebeckCoefficient": 480,
             "resElectricalResistance": 4.04208,
             "resThermalResistance": 5.3272719655886736
