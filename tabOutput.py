@@ -412,7 +412,8 @@ class TabOutput(QWidget):
                     ct.rectangle(bgStartx, cumuThickness, bgWidth, height)
                 else: # stripes
                     coverage = (layer['area'] / structureArea)**(1/2)
-                    nStripes = 5
+                    # nStripes = 5
+                    nStripes = round(self.cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions']**(1/2))
                     coveredArea = coverage * bgWidth
                     blankArea = (1-coverage) * bgWidth
                     stripeWidth = coveredArea / (nStripes + 1)
@@ -427,7 +428,9 @@ class TabOutput(QWidget):
             ### draw heatfluxi
             # > 0 check
             if any([val<0 for val in hfDict.values()]):
-                createText(ct, f"Error: negative Heatflux values", svgWidth/2, svgHeight/2)
+                createText(ct, f"Error: negative Heatfluxes", svgWidth/2, svgHeight/2)
+            elif (hfDict['P_Hotside'] + hfDict['P_HeatConduct']) == 0:
+                createText(ct, f"Error: no Heatfluxes", svgWidth/2, svgHeight/2)
             elif len(hfDict) == 0:
                 createText(ct, f"Choose ΔT", svgWidth/2, svgHeight/2)
             else:

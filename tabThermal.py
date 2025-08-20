@@ -178,7 +178,8 @@ class TabThermal(QWidget):
                     context.rectangle(0, cumuThickness, svgWidth, height)
                 else:
                     coverage = (layer['area'] / structureArea)**(1/2)
-                    nStripes = 5
+                    # nStripes = 5
+                    nStripes = round(self.cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions']**(1/2))
                     coveredArea = coverage * svgWidth
                     blankArea = (1-coverage) * svgWidth
                     stripeWidth = coveredArea / (nStripes + 1)
