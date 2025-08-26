@@ -21,7 +21,7 @@ class PlotCanvas(FigureCanvas):  # TODO: sankey arrows
         self.setParent(parent)
         self.fig.patch.set_alpha(0.0)
         # self.fig.tight_layout()
-        self.ax.set_facecolor((0.5, 0.5, 0.5, 1))
+        self.ax.set_facecolor((0.6, 0.6, 0.6, 1))
         mpl.rcParams['text.color'] = "white"
         mpl.rcParams['axes.labelcolor'] = "white"
         mpl.rcParams['xtick.color'] = "white"
@@ -328,8 +328,11 @@ class TabOutput(QWidget):
 
             P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
 
+
+            decPlaces = 1 if P_Coldside > 1 else 2
+
             self.sankeyMaxCopButton.setText(f"\nMax. COP ({maxCOP:.1f})\nI = {currentMaxCOP:.2f} A\n")
-            self.sankeyMaxPowButton.setText(f"\nMax. Coldside Heatflux ({maxCSPower:.1f} W)\nI = {currentMaxCSPower:.1f} A\n")
+            self.sankeyMaxPowButton.setText(f"\nMax. Coldside Heatflux ({maxCSPower:.{decPlaces}f} W)\nI = {currentMaxCSPower:.2f} A\n")
 
             self.sankeyLabel.setText(f"""
                 Sankey-Heatflux Diagram for ΔT = {tempDiffs[0]} K
@@ -429,10 +432,10 @@ class TabOutput(QWidget):
             # > 0 check
             if any([val<0 for val in hfDict.values()]):
                 createText(ct, f"Error: negative Heatfluxes", svgWidth/2, svgHeight/2)
-            elif (hfDict['P_Hotside'] + hfDict['P_HeatConduct']) == 0:
-                createText(ct, f"Error: no Heatfluxes", svgWidth/2, svgHeight/2)
             elif len(hfDict) == 0:
                 createText(ct, f"Choose ΔT", svgWidth/2, svgHeight/2)
+            elif (hfDict['P_Hotside'] + hfDict['P_HeatConduct']) == 0:
+                createText(ct, f"Error: no Heatfluxes", svgWidth/2, svgHeight/2)
             else:
                 # variables
                 margin = 20
@@ -468,13 +471,22 @@ class TabOutput(QWidget):
                 ct.line_to(heatConductX, hfStarty+margin)
                 ct.stroke()
                 
-
-                # Joule start line
+                # Joule start arrow
                 ct.set_source_rgba(*hfCols['joule'])
-                ct.set_line_width(PJouleWidth)
-                ct.move_to(0, svgHeight/2)
-                ct.line_to(hfStartx, svgHeight/2)
-                ct.stroke()
+                ct.move_to(0, svgHeight/2+PJouleWidth/2)
+                ct.line_to(margin, svgHeight/2)
+                ct.line_to(0, svgHeight/2-PJouleWidth/2)
+                ct.line_to(hfStartx, svgHeight/2-PJouleWidth/2)
+                ct.line_to(hfStartx, svgHeight/2+PJouleWidth/2)
+                ct.close_path()
+                ct.fill()
+
+                # # Joule start line
+                # ct.set_source_rgba(*hfCols['joule'])
+                # ct.set_line_width(PJouleWidth)
+                # ct.move_to(0, svgHeight/2)
+                # ct.line_to(hfStartx, svgHeight/2)
+                # ct.stroke()
 
                 # Joule-Hotside-arc
                 ct.set_line_width(PJouleWidth/2)
@@ -494,19 +506,41 @@ class TabOutput(QWidget):
                 ct.line_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy-margin)
                 ct.stroke()
 
-                # Coldside start line
+                # coldside start arrow
                 ct.set_source_rgba(*hfCols['coldside'])
-                ct.set_line_width(PColdsideWidth)
-                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, hfEndy-margin)
-                ct.stroke()
+                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth, svgHeight)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth, hfEndy-margin)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, hfEndy-margin)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, svgHeight)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, svgHeight)
+                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-margin)
+                ct.close_path()
+                ct.fill()
 
-                # HotSide End Line
+                # # Coldside Start Line
+                # ct.set_source_rgba(*hfCols['coldside'])
+                # ct.set_line_width(PColdsideWidth)
+                # ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight)
+                # ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, hfEndy-margin)
+                # ct.stroke()
+
+                # HotSide End Arrow
                 ct.set_source_rgba(*hfCols['hotside'])
-                ct.set_line_width(PHotSideWidth)
-                ct.move_to(hfMidx - PHeatConductWidth/2, hfStarty+margin)
-                ct.line_to(hfMidx - PHeatConductWidth/2, 0)
-                ct.stroke()
+                ct.move_to(hfMidx-PHeatConductWidth/2-PHotSideWidth/2, hfStarty+margin)
+                ct.line_to(hfMidx-PHeatConductWidth/2-PHotSideWidth/2, margin)
+                ct.line_to(hfMidx-PHeatConductWidth/2, 0)
+                ct.line_to(hfMidx-PHeatConductWidth/2+PHotSideWidth/2, margin)
+                ct.line_to(hfMidx-PHeatConductWidth/2+PHotSideWidth/2, hfStarty+margin)
+
+                ct.close_path()
+                ct.fill()
+
+                # # HotSide End Line
+                # ct.set_source_rgba(*hfCols['hotside'])
+                # ct.set_line_width(PHotSideWidth)
+                # ct.move_to(hfMidx - PHeatConductWidth/2, hfStarty+margin)
+                # ct.line_to(hfMidx - PHeatConductWidth/2, 0)
+                # ct.stroke()
 
                 # Peltier Line
                 ct.set_source_rgba(*hfCols['peltier'])
@@ -528,15 +562,16 @@ class TabOutput(QWidget):
                 ct.stroke()
 
                 # labels
-                createText(ct, f"P_ J ({hfDict['P_Joule']:.1f} W)", 40, svgHeight/2)
-                createText(ct, f"P_HS ({hfDict['P_Hotside']:.1f} W)", hfMidx - PHeatConductWidth/2, 30)
-                createText(ct, f"P_CS ({hfDict['P_Coldside']:.1f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
-                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.1f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
+                decPlaces = 1 if hfDict['P_Coldside'] > 1 else 2
+                createText(ct, f"P_ J ({hfDict['P_Joule']:.{decPlaces}f} W)", margin+40, svgHeight/2)
+                createText(ct, f"P_HS ({hfDict['P_Hotside']:.{decPlaces}f} W)", hfMidx - PHeatConductWidth/2, 30)
+                createText(ct, f"P_CS ({hfDict['P_Coldside']:.{decPlaces}f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
+                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.{decPlaces}f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
                 ct.set_line_width(5)
                 ct.set_source_rgba(*hfCols['bgText'])
                 ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 - PPeltierWidth/2, svgHeight/2-19)
                 ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 + PPeltierWidth/2, svgHeight/2-19)
                 ct.stroke()
-                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.1f} W)", heatConductX+35, svgHeight/2+30)
+                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.{decPlaces}f} W)", heatConductX+35, svgHeight/2+30)
 
         self.svg.load(f"assets/outputSankey_{layoutName}.svg")
