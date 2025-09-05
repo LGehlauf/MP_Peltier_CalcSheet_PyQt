@@ -22,20 +22,20 @@ class TabElectrical(QWidget):
         self.inMaterial = QLineEdit()
         self.inCrossSection = QLineEdit()
         self.inLength = QLineEdit()
-        self.inSpecElResistance = QLineEdit()
+        self.inSpecElConductivity = QLineEdit()
         self.inRowNum = QLineEdit()
 
         self.inMaterial.setPlaceholderText("Material")
         self.inCrossSection.setPlaceholderText("Cross-Section [mm²]")
         self.inLength.setPlaceholderText("Length [mm]")
-        self.inSpecElResistance.setPlaceholderText("Spec. Elec. Resistance [Ohm*m]")
+        self.inSpecElConductivity.setPlaceholderText("Spec. El. Conductivity [S/cm]")
         self.inRowNum.setPlaceholderText("Insert After Row")
 
         self.inputLayout = QHBoxLayout()
         self.inputLayout.addWidget(self.inMaterial)
         self.inputLayout.addWidget(self.inCrossSection)
         self.inputLayout.addWidget(self.inLength)
-        self.inputLayout.addWidget(self.inSpecElResistance)
+        self.inputLayout.addWidget(self.inSpecElConductivity)
         self.inputLayout.addWidget(self.inRowNum)
 
         ### add layer button
@@ -49,7 +49,7 @@ class TabElectrical(QWidget):
         self.header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         self.header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        self.table.setHorizontalHeaderLabels(["Material", "Cross-Section [mm²]", "Length [mm]", "Spec. Elec. Resistance [Ohm*m]"])
+        self.table.setHorizontalHeaderLabels(["Material", "Cross-Section [mm²]", "Length [mm]", "Spec. El. Conductivity [S/cm]"])
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setTable(layoutIndex=0)
 
@@ -90,34 +90,32 @@ class TabElectrical(QWidget):
 
     def addRow(self):
         material = self.inMaterial.text()
-        crossSection = self.inCrossSection.text()
-        length = self.inLength.text()
-        specElResistance = self.inSpecElResistance.text()
-        rowNum = self.inRowNum.text()
-        for x in [crossSection, length, specElResistance]:
-            try:
-                float(x)
-            except:
-                return
-        try: 
-            rowNum = int(rowNum)
+        try:
+            crossSection = float(self.inCrossSection.text())
+            length = float(self.inLength.text())
+            specElConductivity = float(self.inSpecElConductivity.text())
+            rowNum = int(self.inRowNum.text())
         except:
             return
         if rowNum < 0 or rowNum > self.table.rowCount():
             return
         self.cache['layouts'][self.currentLayoutIndex]['electricalStructure'].insert( rowNum, 
-            {'material': material, 'crossSection': float(crossSection), 'length': float(length), 'specElResistance': float(specElResistance)}
+            {'material': material, 'crossSection': crossSection, 'length': length, 'specElConductivity': specElConductivity}
         )
         self.table.insertRow(rowNum)
-        self.table.setItem(rowNum, 0, QTableWidgetItem(material))
-        self.table.setItem(rowNum, 1, QTableWidgetItem(crossSection))
-        self.table.setItem(rowNum, 2, QTableWidgetItem(length))
-        self.table.setItem(rowNum, 3, QTableWidgetItem(specElResistance))
+
+        for i, item in enumerate([material, crossSection, length, specElConductivity]):
+            if isinstance(item, (float, int)):
+                if abs(item) > 1e4 or abs(item) < 1e-2:
+                    item = f"{item:.2e}"
+                else:
+                    item = str(item)
+            self.table.setItem(rowNum, i, QTableWidgetItem(item))
 
         self.inMaterial.clear()
         self.inCrossSection.clear()
         self.inLength.clear()
-        self.inSpecElResistance.clear()
+        self.inSpecElConductivity.clear()
         self.inRowNum.clear()
         
         self.setOutput(self.currentLayoutIndex)
@@ -130,8 +128,14 @@ class TabElectrical(QWidget):
             row = self.table.rowCount()
             self.table.insertRow(row)
             for i, item in enumerate(layer.values()):
-                self.table.setItem(row, i, QTableWidgetItem(str(item)))
+                if isinstance(item, (float, int)):
+                    if abs(item) > 1e4 or abs(item) < 1e-2:
+                        item = f"{item:.2e}"
+                    else:
+                        item = str(item)
     
+                self.table.setItem(row, i, QTableWidgetItem(item))
+
     def rightClickOnTable(self, pos: QPoint):
         item = self.table.itemAt(pos)
         if item:
@@ -176,7 +180,8 @@ class TabElectrical(QWidget):
 
         resElResistance = 0
         for con in structure:
-            resElResistance += con['specElResistance'] * (con['length']/1000) / (con['crossSection']/1000/1000)
+            # R = (l [mm]*10 / (sigma [S/ cm] * A [mm²]))
+            resElResistance += con['length']*10 / (con['specElConductivity'] * con['crossSection'])
         resElResistance *= self.cache['layouts'][layoutIndex]['numberOfElectricalRepetitions']
         self.outputResLabel.setText(f"Resulting Electrical Resistance: {resElResistance:.2f} Ohm") 
         self.cache['layouts'][layoutIndex]['resElectricalResistance'] = resElResistance

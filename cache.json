@@ -16,13 +16,7 @@
                     "thermalConductivity": 401
                 },
                 {
-                    "material": "BiTe-n",
-                    "area": 393.75,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "BiTe-p",
+                    "material": "BiTe",
                     "area": 393.75,
                     "thickness": 1.25,
                     "thermalConductivity": 1.2
@@ -45,280 +39,26 @@
                     "material": "Cu",
                     "crossSection": 0.125,
                     "length": 1.25,
-                    "specElResistance": 1.68e-08
+                    "specElConductivity": 5.8e5 
                 },
                 {
-                    "material": "BiTe-n",
+                    "material": "BiTe",
                     "crossSection": 1.5625,
                     "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "BiTe-p",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
+                    "specElConductivity": 550
                 },
                 {
                     "material": "Cu",
                     "crossSection": 0.125,
                     "length": 1.25,
-                    "specElResistance": 1.68e-08
+                    "specElConductivity": 5.8e5 
                 }
             ],
             "numberOfElectricalRepetitions": 126,
             "combinedSeebeckCoefficient": 480,
-            "resElectricalResistance": 4.04208,
-            "resThermalResistance": 5.3272719655886736
-        },
-        {
-            "name": "tec-12706-with-PEDOT in-plane",
-            "thermalStructure": [
-                {
-                    "material": "AlO",
-                    "area": 1600,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                },
-                {
-                    "material": "Cu",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "BiTe-n",
-                    "area": 393.75,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "PEDOT-in-plane",
-                    "area": 200,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "BiTe-p",
-                    "area": 393.75,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "Cu",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "AlO",
-                    "area": 1600,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                }
-            ],
-            "electricalStructure": [
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                },
-                {
-                    "material": "BiTe-n",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "PEDOT-in-plane",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 3.6e-05
-                },
-                {
-                    "material": "BiTe-p",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                }
-            ],
-            "numberOfElectricalRepetitions": 126,
-            "combinedSeebeckCoefficient": 480,
-            "resElectricalResistance": 49.40208,
-            "resThermalResistance": 10.53560529892201
-        },
-        {
-            "name": "tec-12706-with-PEDOT through-plane",
-            "thermalStructure": [
-                {
-                    "material": "AlO",
-                    "area": 1600,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                },
-                {
-                    "material": "Cu",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "BiTe-n",
-                    "area": 393.75,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "PEDOT-through-plane",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 0.3
-                },
-                {
-                    "material": "BiTe-p",
-                    "area": 393.75,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "Cu",
-                    "area": 393.75,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "AlO",
-                    "area": 1600,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                }
-            ],
-            "electricalStructure": [
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                },
-                {
-                    "material": "BiTe-n",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "PEDOT-through-plane",
-                    "crossSection": 1.5625,
-                    "length": 0.1,
-                    "specElResistance": 8070.0
-                },
-                {
-                    "material": "BiTe-p",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                }
-            ],
-            "numberOfElectricalRepetitions": 126,
-            "combinedSeebeckCoefficient": 480,
-            "resElectricalResistance": 65076484.04208001,
-            "resThermalResistance": 6.17383281214952
-        },
-        {
-            "name": "PEDOT in-plane Funktionsmuster (4 cubes per side)",
-            "thermalStructure": [
-                {
-                    "material": "AlO",
-                    "area": 30,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                },
-                {
-                    "material": "Cu",
-                    "area": 6.25,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "BiTe-n",
-                    "area": 6.25,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "PEDOT-in-plane with Polycarbonat",
-                    "area": 5,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "BiTe-p",
-                    "area": 6.25,
-                    "thickness": 1.25,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "Cu",
-                    "area": 6.25,
-                    "thickness": 0.1,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "AlO",
-                    "area": 30,
-                    "thickness": 0.7,
-                    "thermalConductivity": 25
-                }
-            ],
-            "electricalStructure": [
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                },
-                {
-                    "material": "BiTe-n",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "PEDOT-in-plane",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 3.6e-05
-                },
-                {
-                    "material": "BiTe-p",
-                    "crossSection": 1.5625,
-                    "length": 1.25,
-                    "specElResistance": 1.984e-05
-                },
-                {
-                    "material": "Cu",
-                    "crossSection": 0.125,
-                    "length": 1.25,
-                    "specElResistance": 1.68e-08
-                }
-            ],
-            "numberOfElectricalRepetitions": 4,
-            "combinedSeebeckCoefficient": 480,
-            "resElectricalResistance": 1.56832,
-            "resThermalResistance": 543.6131338320864
+            "resElectricalResistance": 1.8331617554858934,
+            "resThermalResistance": 2.6817693200860284
         }
+ 
     ]
 }

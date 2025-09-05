@@ -13,7 +13,7 @@ from matplotlib.figure import Figure
 import matplotlib as mpl
 import numpy as np
 
-class PlotCanvas(FigureCanvas):  # TODO: sankey arrows
+class PlotCanvas(FigureCanvas):  # TODO: 
     def __init__(self, parent=None):
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
