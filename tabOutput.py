@@ -95,7 +95,7 @@ class PlotCanvas(FigureCanvas):  # TODO:
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("COP")
         self.ax.grid()
-        self.ax.set_ylim(0, 6)
+        self.ax.set_ylim(0, 3)
         self.ax.set_title("Coefficient of Performance (COP)")
         self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
         self.draw()
@@ -269,7 +269,7 @@ class TabOutput(QWidget):
     def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
         self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
-        current = np.linspace(0, 6, 60)
+        current = np.linspace(0, 6, 100)
         resPeltierCoefficient = (
             layout['combinedSeebeckCoefficient']/1000/1000 # µV/K -> V/K
             * layout['numberOfElectricalRepetitions'] 
@@ -281,12 +281,13 @@ class TabOutput(QWidget):
         P_Results = []
         COPs = []
         for tempDiff in tempDiffs:
-            npTempDiff = np.linspace(tempDiff, tempDiff, 60)
+            npTempDiff = np.linspace(tempDiff, tempDiff, 100)
             P_HeatConduct = - npTempDiff / (layout['resThermalResistance'] * thermResFactor)
             P_HeatConducts.append(P_HeatConduct)
             P_Res = P_Peltier + 0.5 * P_Joule + P_HeatConduct
             P_Results.append(P_Res)
-            COPs.append(np.divide(P_Res, -P_Joule, out=np.zeros_like(P_Res), where=P_Joule!=0))
+            # COPs.append(np.divide(P_Res, -P_Joule, out=np.zeros_like(P_Res), where=P_Joule!=0)) # wrong?! TODO
+            COPs.append(np.divide(P_Res, -P_Joule + P_Peltier, out=np.zeros_like(P_Res), where=P_Joule!=0)) 
 
         self.manipElResMidLabel.setText(f"""
             {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
