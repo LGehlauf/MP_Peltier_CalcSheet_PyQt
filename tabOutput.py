@@ -33,13 +33,13 @@ class PlotCanvas(FigureCanvas):  # TODO:
         self.ax.clear()
         I = heatfluxi['I']
         P_Ress = heatfluxi['P_Results']
-        P_Pe = heatfluxi['P_Peltier']
+        P_Pes = heatfluxi['P_Peltiers']
         P_J = heatfluxi['P_Joule']
         P_Ls = heatfluxi['P_HeatConducts']
         if len(dTs) == 1:
             self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
                 self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]} K)", c='orange', lw=1)
                 self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
 
@@ -47,7 +47,8 @@ class PlotCanvas(FigureCanvas):  # TODO:
             self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
             self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
                 self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]} K)", c='orange', lw=1)
                 self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
                 self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
@@ -57,19 +58,24 @@ class PlotCanvas(FigureCanvas):  # TODO:
             self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
             self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=1.5, ls=':')
             if showComponents:
-                self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
+                self.ax.plot(I, P_Pes[2], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[2]} K)", c='blue', lw=1, ls=':' )
                 self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='orange', lw=1)
                 self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
                 self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
+                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':' )
 
         elif len(dTs) == 4:
             self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
             self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
-            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=1.5, ls=':')
+            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=1.5, ls=':' )
             self.ax.plot(I, P_Ress[3], label=f"$P_{{CS}}$ ($\Delta$T={dTs[3]} K)", c='green', lw=1.5, ls='-.')
             if showComponents:
-                    self.ax.plot(I, P_Pe, label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='blue', lw=1)
+                    self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
+                    self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
+                    self.ax.plot(I, P_Pes[2], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[2]} K)", c='blue', lw=1, ls=':' )
+                    self.ax.plot(I, P_Pes[3], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[3]} K)", c='blue', lw=1, ls='-.')
                     self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
                     self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
                     self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
@@ -95,7 +101,7 @@ class PlotCanvas(FigureCanvas):  # TODO:
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("COP")
         self.ax.grid()
-        self.ax.set_ylim(0, 3)
+        self.ax.set_ylim(0, 20)
         self.ax.set_title("Coefficient of Performance (COP)")
         self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
         self.draw()
@@ -212,7 +218,7 @@ class TabOutput(QWidget):
         sankeyLayout.addWidget(self.svg)
         bigLegendL = QLabel("ΔT...\nP_J\nP_HS...\nP_CS...\nP_Pe...\nP_λ...")
         bigLegendL.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nJoule-Heatflux/ Input Power\nHotside-Heatflux\nColdside-Heatflux\nPeltier-Heatflux\nReturning Conductivity Heatflux")
+        bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nJoule-Heatflux\nHotside-Heatflux\nColdside-Heatflux\nPeltier-Heatflux\nReturning Conductivity Heatflux")
         bigLegendLayout = QHBoxLayout()
         bigLegendLayout.addWidget(bigLegendL)
         bigLegendLayout.addWidget(bigLegendR)
@@ -267,27 +273,30 @@ class TabOutput(QWidget):
         self.drawSankeySvg(layoutIndex, sankeyDict)
 
     def calcHeatfluxi(self, layoutIndex, tempDiffs, elResFactor, thermResFactor):
-        self.currentLayoutIndex = layoutIndex
         layout = self.cache['layouts'][layoutIndex]
+        moduleSeebeckCoefficient = (layout['combinedSeebeckCoefficient']/1000/1000 # µV/K -> V/K
+            * layout['numberOfElectricalRepetitions'])
+        self.currentLayoutIndex = layoutIndex
         current = np.linspace(0, 6, 100)
-        resPeltierCoefficient = (
-            layout['combinedSeebeckCoefficient']/1000/1000 # µV/K -> V/K
-            * layout['numberOfElectricalRepetitions'] 
-            * 293.15 # temperature
-        ) # V
-        P_Peltier = current * resPeltierCoefficient
         P_Joule = - current * current * layout['resElectricalResistance'] * elResFactor
+        P_Peltiers = []
         P_HeatConducts = []
         P_Results = []
         COPs = []
         for tempDiff in tempDiffs:
+            P_Peltier = ( moduleSeebeckCoefficient     
+                * (293.15 - tempDiff) # coldside temperature
+                * current
+            ) # W
+            P_Peltiers.append(P_Peltier)
             npTempDiff = np.linspace(tempDiff, tempDiff, 100)
             P_HeatConduct = - npTempDiff / (layout['resThermalResistance'] * thermResFactor)
             P_HeatConducts.append(P_HeatConduct)
             P_Res = P_Peltier + 0.5 * P_Joule + P_HeatConduct
             P_Results.append(P_Res)
-            # COPs.append(np.divide(P_Res, -P_Joule, out=np.zeros_like(P_Res), where=P_Joule!=0)) # wrong?! TODO
-            COPs.append(np.divide(P_Res, -P_Joule + P_Peltier, out=np.zeros_like(P_Res), where=P_Joule!=0)) 
+            # COPs.append(np.divide(P_Res, -P_Joule + P_Peltier, out=np.zeros_like(P_Res), where=P_Joule!=0)) 
+            COPs.append(np.divide(P_Res, -P_Joule + moduleSeebeckCoefficient * current * (tempDiff), out=np.zeros_like(P_Res), where=P_Joule!=0)) 
+            # COPs.append(P_Res/ (-P_Joule + P_Peltier))
 
         self.manipElResMidLabel.setText(f"""
             {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
@@ -299,7 +308,7 @@ class TabOutput(QWidget):
         return {
             'I': current,
             'P_Joule': P_Joule,
-            'P_Peltier': P_Peltier,
+            'P_Peltiers': P_Peltiers,
             'P_HeatConducts': P_HeatConducts,
             'P_Results': P_Results,
             'COPs': COPs
@@ -319,13 +328,13 @@ class TabOutput(QWidget):
                 P_Coldside = maxCSPower
                 P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
                 P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
-                P_Peltier = hfDict['P_Peltier'][maxCSPowerIndex] 
+                P_Peltier = hfDict['P_Peltiers'][0][maxCSPowerIndex] 
 
             else:
                 P_Coldside = hfDict['P_Results'][0][maxCOPIndex] 
                 P_Joule = - hfDict['P_Joule'][maxCOPIndex]
                 P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCOPIndex]
-                P_Peltier = hfDict['P_Peltier'][maxCOPIndex] 
+                P_Peltier = hfDict['P_Peltiers'][0][maxCOPIndex] 
 
             P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
 
