@@ -7,104 +7,10 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QAction
 from PyQt6.QtSvgWidgets import QSvgWidget
-import cairo
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib as mpl
 import numpy as np
+from tabOutputSankey import drawSankeySvg
+from tabOutputMpl import PlotCanvas
 
-class PlotCanvas(FigureCanvas):  # TODO: 
-    def __init__(self, parent=None):
-        self.fig = Figure(figsize=(5, 4), dpi=100)
-        self.ax = self.fig.add_subplot(111)
-        super().__init__(self.fig)
-        self.setParent(parent)
-        self.fig.patch.set_alpha(0.0)
-        # self.fig.tight_layout()
-        self.ax.set_facecolor((0.6, 0.6, 0.6, 1))
-        mpl.rcParams['text.color'] = "white"
-        mpl.rcParams['axes.labelcolor'] = "white"
-        mpl.rcParams['xtick.color'] = "white"
-        mpl.rcParams['ytick.color'] = "white"
-        for spine in self.ax.spines.values():
-            spine.set_color("gray")
-
-    def plot_I_P(self, heatfluxi, dTs, showComponents):
-        self.ax.clear()
-        I = heatfluxi['I']
-        P_Ress = heatfluxi['P_Results']
-        P_Pes = heatfluxi['P_Peltiers']
-        P_J = heatfluxi['P_Joule']
-        P_Ls = heatfluxi['P_HeatConducts']
-        if len(dTs) == 1:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
-            if showComponents:
-                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
-
-        elif len(dTs) == 2:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
-            if showComponents:
-                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-
-        elif len(dTs) == 3:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
-            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=1.5, ls=':')
-            if showComponents:
-                self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
-                self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
-                self.ax.plot(I, P_Pes[2], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[2]} K)", c='blue', lw=1, ls=':' )
-                self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]} K)", c='orange', lw=1)
-                self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':' )
-
-        elif len(dTs) == 4:
-            self.ax.plot(I, P_Ress[0], label=f"$P_{{CS}}$ ($\Delta$T={dTs[0]} K)", c='green', lw=1.5)
-            self.ax.plot(I, P_Ress[1], label=f"$P_{{CS}}$ ($\Delta$T={dTs[1]} K)", c='green', lw=1.5, ls='--')
-            self.ax.plot(I, P_Ress[2], label=f"$P_{{CS}}$ ($\Delta$T={dTs[2]} K)", c='green', lw=1.5, ls=':' )
-            self.ax.plot(I, P_Ress[3], label=f"$P_{{CS}}$ ($\Delta$T={dTs[3]} K)", c='green', lw=1.5, ls='-.')
-            if showComponents:
-                    self.ax.plot(I, P_Pes[0], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[0]} K)", c='blue', lw=1)
-                    self.ax.plot(I, P_Pes[1], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[1]} K)", c='blue', lw=1, ls='--')
-                    self.ax.plot(I, P_Pes[2], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[2]} K)", c='blue', lw=1, ls=':' )
-                    self.ax.plot(I, P_Pes[3], label=f"$P_{{Pe}}$ ($\Delta T=${dTs[3]} K)", c='blue', lw=1, ls='-.')
-                    self.ax.plot(I, P_J, label=f"$P_{{J}}$ ($\Delta T=${dTs[0]},{dTs[1]},{dTs[2]},{dTs[3]} K)", c='orange', lw=1)
-                    self.ax.plot(I, P_Ls[0], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[0]} K)", c='red', lw=1)
-                    self.ax.plot(I, P_Ls[1], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[1]} K)", c='red', lw=1, ls='--')
-                    self.ax.plot(I, P_Ls[2], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[2]} K)", c='red', lw=1, ls=':')
-                    self.ax.plot(I, P_Ls[3], label=f"$P_{{\lambda}}$ ($\Delta T=${dTs[3]} K)", c='red', lw=1, ls='-.')
-
-        self.ax.set_xlabel("I [A]")
-        self.ax.set_ylabel("P [W]")
-        self.ax.grid()
-        self.ax.set_title("Heatfluxes")
-        self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
-
-        self.draw()
-
-    def plot_I_COP(self, heatfluxi, dTs):
-        self.ax.clear()
-        # cop = []
-        linetypes = ['-', '--', ':', '-.']
-        for i, res in enumerate(heatfluxi['COPs']):
-            # cop.append(res/ -heatfluxi['P_Joule'])
-            self.ax.plot(heatfluxi['I'], heatfluxi['COPs'][i], label=f"$\Delta$T={dTs[i]} K", c='white', lw=1.5, ls=linetypes[i])
-
-        self.ax.set_xlabel("I [A]")
-        self.ax.set_ylabel("COP")
-        self.ax.grid()
-        self.ax.set_ylim(0, 20)
-        self.ax.set_title("Coefficient of Performance (COP)")
-        self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
-        self.draw()
 
 class TabOutput(QWidget):
     def __init__(self, cache):
@@ -114,6 +20,8 @@ class TabOutput(QWidget):
 
         self.init()
         self.connect()
+    
+    drawSankeySvg = drawSankeySvg
     
     def init(self):
         self.tempDiffs = [0, 10, 30, 60]
@@ -216,9 +124,9 @@ class TabOutput(QWidget):
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         sankeyLayout.addWidget(self.svg)
-        bigLegendL = QLabel("ΔT...\nP_J\nP_HS...\nP_CS...\nP_Pe...\nP_λ...")
+        bigLegendL = QLabel("ΔT...\nP_In\nP_S\nP_J\nP_HS...\nP_CS...\nP_Pe...\nP_λ...")
         bigLegendL.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nJoule-Heatflux\nHotside-Heatflux\nColdside-Heatflux\nPeltier-Heatflux\nReturning Conductivity Heatflux")
+        bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nInput Power\nSeebeck Power\nJoule Heatflux\nHotside Heatflux\nColdside Heatflux\nPeltier Heatflux\nReturning Conductivity Heatflux")
         bigLegendLayout = QHBoxLayout()
         bigLegendLayout.addWidget(bigLegendL)
         bigLegendLayout.addWidget(bigLegendR)
@@ -282,6 +190,7 @@ class TabOutput(QWidget):
         P_Peltiers = []
         P_HeatConducts = []
         P_Results = []
+        P_Ins = []
         COPs = []
         for tempDiff in tempDiffs:
             P_Peltier = ( moduleSeebeckCoefficient     
@@ -294,9 +203,9 @@ class TabOutput(QWidget):
             P_HeatConducts.append(P_HeatConduct)
             P_Res = P_Peltier + 0.5 * P_Joule + P_HeatConduct
             P_Results.append(P_Res)
-            # COPs.append(np.divide(P_Res, -P_Joule + P_Peltier, out=np.zeros_like(P_Res), where=P_Joule!=0)) 
-            COPs.append(np.divide(P_Res, -P_Joule + moduleSeebeckCoefficient * current * (tempDiff), out=np.zeros_like(P_Res), where=P_Joule!=0)) 
-            # COPs.append(P_Res/ (-P_Joule + P_Peltier))
+            P_In = -P_Joule + moduleSeebeckCoefficient * current * tempDiff
+            P_Ins.append(P_In)
+            COPs.append(np.divide(P_Res, P_In, out=np.zeros_like(P_Res), where=P_Joule!=0)) 
 
         self.manipElResMidLabel.setText(f"""
             {elResFactor * 100:.0f} % ({elResFactor * self.cache['layouts'][self.currentLayoutIndex]['resElectricalResistance']:.2f} Ω)
@@ -311,6 +220,7 @@ class TabOutput(QWidget):
             'P_Peltiers': P_Peltiers,
             'P_HeatConducts': P_HeatConducts,
             'P_Results': P_Results,
+            'P_Ins': P_Ins,
             'COPs': COPs
         }
         
@@ -329,15 +239,18 @@ class TabOutput(QWidget):
                 P_Joule = - hfDict['P_Joule'][maxCSPowerIndex]
                 P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCSPowerIndex]
                 P_Peltier = hfDict['P_Peltiers'][0][maxCSPowerIndex] 
+                P_In = hfDict['P_Ins'][0][maxCSPowerIndex]
+                P_Seebeck = hfDict['P_Ins'][0][maxCSPowerIndex] - P_Joule
 
             else:
                 P_Coldside = hfDict['P_Results'][0][maxCOPIndex] 
                 P_Joule = - hfDict['P_Joule'][maxCOPIndex]
                 P_HeatConduct = - hfDict['P_HeatConducts'][0][maxCOPIndex]
                 P_Peltier = hfDict['P_Peltiers'][0][maxCOPIndex] 
+                P_In = hfDict['P_Ins'][0][maxCOPIndex]
+                P_Seebeck = hfDict['P_Ins'][0][maxCOPIndex] - P_Joule
 
             P_Hotside = 0.5 * P_Joule + P_Peltier - P_HeatConduct
-
 
             decPlaces = 1 if P_Coldside > 1 else 2
 
@@ -357,231 +270,7 @@ class TabOutput(QWidget):
             'P_Coldside': P_Coldside,
             'P_Joule': P_Joule,
             'P_HeatConduct': P_HeatConduct,
-            'P_Peltier': P_Peltier
+            'P_Peltier': P_Peltier,
+            'P_In': P_In,
+            'P_Seebeck': P_Seebeck
         }
-
-
-    def drawSankeySvg(self, layoutIndex, hfDict): 
-        def createText(context, text, centerx, centery):
-            context.save()
-            (x, y, width, height, dx, dy) = context.text_extents(text)
-            textPosx = centerx - width/2 - x 
-            textPosy = centery - height/2 - y
-            context.set_source_rgba(*hfCols['bgText'])
-            context.rectangle(textPosx-2, textPosy-height-3, width+7, height+8)
-            context.fill()
-            context.set_source_rgba(*hfCols['text'])
-            context.move_to(textPosx, textPosy)
-            context.show_text(text)
-            context.restore()
-            context.new_path()
-
-        self.currentLayoutIndex = layoutIndex
-        layoutName = self.cache['layouts'][layoutIndex]['name']
-        svgWidth, svgHeight = 500, 500
-        bgWidth, bgHeight = 0.9 * svgWidth, 0.9 * svgHeight
-        self.svg.setFixedSize(svgWidth, svgHeight)
-        layerCols = [
-            (1.0, 0.701, 0.729),   # Pastellrosa
-            (1.0, 0.874, 0.729),   # Pastellorange
-            (1.0, 1.0, 0.729),     # Pastellgelb
-            (0.729, 1.0, 0.788),   # Pastellgrün
-            (0.729, 1.0, 1.0),     # Pastelltürkis
-            (0.729, 0.882, 1.0),   # Pastellblau
-            (0.855, 0.729, 1.0),   # Pastelllila
-            (1.0, 0.729, 0.945),   # Pastellmagenta
-            (0.941, 0.941, 0.941), # Hellgrau / Weißpastell
-            (1.0, 0.8, 0.898)      # Zartes Rosa
-        ]
-        hfCols = {
-            'bgText': (1.0, 1.0, 1.0, 0.3),
-            'text': (0.0, 0.0, 0.0, 1.0),
-            'endBlock': (0.0, 0.0, 0.0, 0.7), # black
-            'heatConduct': (1.0, 0.0, 0.0, 0.7), # red
-            'coldside': (0.0, 0.5019607843137255, 0.0, 0.7), # green
-            'peltier': (0.0, 0.0, 1.0, 0.7), # blue
-            'hotside': (1.0, 0.0, 1.0, 0.7), # violet
-            'joule': (1.0, 0.6470588235294118, 0.0, 0.7) # orange
-        }
-        structure = self.cache['layouts'][self.currentLayoutIndex]['thermalStructure']
-        structureHeight = sum((layer['thickness'] for layer in structure))
-        structureArea = max((layer['area'] for layer in structure))
-        layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
-        with cairo.SVGSurface(f"assets/outputSankey_{layoutName}.svg", svgWidth, svgHeight) as surface:
-            ### draw background
-            ct = cairo.Context(surface)
-            ct.select_font_face('Sans', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-            ct.set_font_size(12)
-            bgStartx = (svgWidth-bgWidth)/2
-            bgStarty = (svgHeight-bgHeight)/2
-            cumuThickness = bgStarty
-            for i, layer in enumerate(structure):
-                r = layerCols[i%len(layerCols)][0]
-                g = layerCols[i%len(layerCols)][1]
-                b = layerCols[i%len(layerCols)][2]
-                ct.set_source_rgba(r, g, b, 0.2)
-                height = layer['thickness'] / structureHeight * bgHeight
-                if layer['area'] == structureArea: # full rectangle
-                    ct.rectangle(bgStartx, cumuThickness, bgWidth, height)
-                else: # stripes
-                    coverage = (layer['area'] / structureArea)**(1/2)
-                    # nStripes = 5
-                    nStripes = round(self.cache['layouts'][self.currentLayoutIndex]['numberOfElectricalRepetitions']**(1/2))
-                    coveredArea = coverage * bgWidth
-                    blankArea = (1-coverage) * bgWidth
-                    stripeWidth = coveredArea / (nStripes + 1)
-                    gapWidth = blankArea / nStripes 
-                    x = bgStartx + (gapWidth + stripeWidth) / 2
-                    for i in range(nStripes):
-                        ct.rectangle(x, cumuThickness, stripeWidth, height)
-                        x += (stripeWidth + gapWidth)
-                cumuThickness += height
-                ct.fill()
-            
-            ### draw heatfluxi
-            # > 0 check
-            if any([val<0 for val in hfDict.values()]):
-                createText(ct, f"Error: negative Heatfluxes", svgWidth/2, svgHeight/2)
-            elif len(hfDict) == 0:
-                createText(ct, f"Choose ΔT", svgWidth/2, svgHeight/2)
-            elif (hfDict['P_Hotside'] + hfDict['P_HeatConduct']) == 0:
-                createText(ct, f"Error: no Heatfluxes", svgWidth/2, svgHeight/2)
-            else:
-                # variables
-                margin = 20
-                hfStartx = bgStartx + margin
-                hfStarty = bgStarty + margin
-                hfEndx = bgStartx + bgWidth - margin
-                hfEndy = bgStarty + bgHeight - margin
-                hfMidx = (hfEndx + hfStartx)/2
-                hfMidy = (hfEndy + hfStarty)/2
-
-                hfPixelRatio = (bgWidth - 8 * margin) / (hfDict['P_Hotside'] + hfDict['P_HeatConduct'])
-                PHotSideWidth = hfDict['P_Hotside'] * hfPixelRatio
-                PJouleWidth = hfDict['P_Joule'] * hfPixelRatio
-                PColdsideWidth = hfDict['P_Coldside'] * hfPixelRatio
-                PHeatConductWidth = hfDict['P_HeatConduct'] * hfPixelRatio
-                PPeltierWidth = hfDict['P_Peltier'] * hfPixelRatio
-
-                PHotSideAndHeatConductWidth = PHotSideWidth + PHeatConductWidth
-
-                # Heatconduct line
-                heatConductX = hfMidx+((PHotSideAndHeatConductWidth)/2)-PHeatConductWidth/2
-                ct.set_source_rgba(*hfCols['heatConduct'])
-                ct.set_line_width(PHeatConductWidth)
-                ct.move_to(heatConductX, hfEndy-margin)
-                ct.line_to(heatConductX, hfStarty+margin)
-                ct.stroke()
-                # Heatconduct start and end block
-                ct.set_source_rgba(*hfCols['endBlock'])
-                ct.move_to(heatConductX, hfEndy)
-                ct.line_to(heatConductX, hfEndy-margin)
-                ct.stroke()
-                ct.move_to(heatConductX, hfStarty)
-                ct.line_to(heatConductX, hfStarty+margin)
-                ct.stroke()
-                
-                # Joule start arrow
-                ct.set_source_rgba(*hfCols['joule'])
-                ct.move_to(0, svgHeight/2+PJouleWidth/2)
-                ct.line_to(margin, svgHeight/2)
-                ct.line_to(0, svgHeight/2-PJouleWidth/2)
-                ct.line_to(hfStartx, svgHeight/2-PJouleWidth/2)
-                ct.line_to(hfStartx, svgHeight/2+PJouleWidth/2)
-                ct.close_path()
-                ct.fill()
-
-                # # Joule start line
-                # ct.set_source_rgba(*hfCols['joule'])
-                # ct.set_line_width(PJouleWidth)
-                # ct.move_to(0, svgHeight/2)
-                # ct.line_to(hfStartx, svgHeight/2)
-                # ct.stroke()
-
-                # Joule-Hotside-arc
-                ct.set_line_width(PJouleWidth/2)
-                ct.set_source_rgba(*hfCols['joule'])
-                ct.save()
-                ct.translate(hfStartx, hfStarty+margin)
-                scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth/4) - hfStartx
-                scaley = (hfMidy - PJouleWidth/4) - (hfStarty + margin) 
-                ct.scale(scalex, scaley)
-                ct.arc(0.0, 0.0, 1.0, 0, 0.5*np.pi)
-                ct.restore()
-                ct.stroke()
-
-                # Joule-Coldside endblock
-                ct.set_source_rgba(*hfCols['endBlock'])
-                ct.move_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy)
-                ct.line_to(hfMidx-(PHotSideAndHeatConductWidth/2)+ 0.75 * PJouleWidth, hfEndy-margin)
-                ct.stroke()
-
-                # coldside start arrow
-                ct.set_source_rgba(*hfCols['coldside'])
-                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth, svgHeight)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth, hfEndy-margin)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, hfEndy-margin)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, svgHeight)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth, svgHeight)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-margin)
-                ct.close_path()
-                ct.fill()
-
-                # # Coldside Start Line
-                # ct.set_source_rgba(*hfCols['coldside'])
-                # ct.set_line_width(PColdsideWidth)
-                # ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight)
-                # ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, hfEndy-margin)
-                # ct.stroke()
-
-                # HotSide End Arrow
-                ct.set_source_rgba(*hfCols['hotside'])
-                ct.move_to(hfMidx-PHeatConductWidth/2-PHotSideWidth/2, hfStarty+margin)
-                ct.line_to(hfMidx-PHeatConductWidth/2-PHotSideWidth/2, margin)
-                ct.line_to(hfMidx-PHeatConductWidth/2, 0)
-                ct.line_to(hfMidx-PHeatConductWidth/2+PHotSideWidth/2, margin)
-                ct.line_to(hfMidx-PHeatConductWidth/2+PHotSideWidth/2, hfStarty+margin)
-
-                ct.close_path()
-                ct.fill()
-
-                # # HotSide End Line
-                # ct.set_source_rgba(*hfCols['hotside'])
-                # ct.set_line_width(PHotSideWidth)
-                # ct.move_to(hfMidx - PHeatConductWidth/2, hfStarty+margin)
-                # ct.line_to(hfMidx - PHeatConductWidth/2, 0)
-                # ct.stroke()
-
-                # Peltier Line
-                ct.set_source_rgba(*hfCols['peltier'])
-                ct.set_line_width(PPeltierWidth)
-                ct.move_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfEndy-margin)
-                ct.line_to(hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, hfStarty+margin)
-                ct.stroke()
-
-                # Joule-Coldside-arc
-                ct.set_line_width(PJouleWidth/2)
-                ct.set_source_rgba(*hfCols['joule'])
-                ct.save()
-                ct.translate(hfStartx, hfEndy-margin)
-                scalex = (hfMidx - PHotSideAndHeatConductWidth/2 + PJouleWidth * 3/4) - hfStartx
-                scaley = (hfEndy - margin) - (hfMidy + PJouleWidth/4)
-                ct.scale(scalex, scaley)
-                ct.arc(0.0, 0.0, 1.0, 1.5*np.pi, 2*np.pi)
-                ct.restore()
-                ct.stroke()
-
-                # labels
-                decPlaces = 1 if hfDict['P_Coldside'] > 1 else 2
-                createText(ct, f"P_ J ({hfDict['P_Joule']:.{decPlaces}f} W)", margin+40, svgHeight/2)
-                createText(ct, f"P_HS ({hfDict['P_Hotside']:.{decPlaces}f} W)", hfMidx - PHeatConductWidth/2, 30)
-                createText(ct, f"P_CS ({hfDict['P_Coldside']:.{decPlaces}f} W)", hfMidx+PHotSideAndHeatConductWidth/2-PHeatConductWidth-PColdsideWidth/2, svgHeight-30)
-                createText(ct, f"P_Pe ({hfDict['P_Peltier']:.{decPlaces}f} W)", hfMidx + PHotSideAndHeatConductWidth/2 - PPeltierWidth/2, svgHeight/2-30)
-                ct.set_line_width(5)
-                ct.set_source_rgba(*hfCols['bgText'])
-                ct.move_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 - PPeltierWidth/2, svgHeight/2-19)
-                ct.line_to(hfMidx+PHotSideAndHeatConductWidth/2-PPeltierWidth/2 + PPeltierWidth/2, svgHeight/2-19)
-                ct.stroke()
-                createText(ct, f"P_λ ({hfDict['P_HeatConduct']:.{decPlaces}f} W)", heatConductX+35, svgHeight/2+30)
-
-        self.svg.load(f"assets/outputSankey_{layoutName}.svg")

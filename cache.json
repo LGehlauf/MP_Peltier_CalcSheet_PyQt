@@ -55,7 +55,7 @@
                 }
             ],
             "numberOfElectricalRepetitions": 126,
-            "combinedSeebeckCoefficient": 480,
+            "combinedSeebeckCoefficient": 500,
             "resElectricalResistance": 1.8331617554858934,
             "resThermalResistance": 2.6817693200860284
         }
