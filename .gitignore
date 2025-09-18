@@ -10,6 +10,7 @@ __pycache__/
 ### SVG ###
 *.svg
 
+.vscode/
 
 # C extensions
 *.so
