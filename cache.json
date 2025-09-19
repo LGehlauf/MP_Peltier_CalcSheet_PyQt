@@ -6,7 +6,7 @@
                 {
                     "material": "AlO",
                     "area": 1600,
-                    "thickness": 0.7,
+                    "thickness": 0.9,
                     "thermalConductivity": 25
                 },
                 {
@@ -30,7 +30,7 @@
                 {
                     "material": "AlO",
                     "area": 1600,
-                    "thickness": 0.7,
+                    "thickness": 0.9,
                     "thermalConductivity": 25
                 }
             ],
@@ -39,7 +39,7 @@
                     "material": "Cu",
                     "crossSection": 0.6,
                     "length": 1.3,
-                    "specElConductivity": 5.8e5 
+                    "specElConductivity": 580000.0
                 },
                 {
                     "material": "BiTe",
@@ -50,67 +50,8 @@
             ],
             "numberOfElectricalRepetitions": 126,
             "combinedSeebeckCoefficient": 500,
-            "resElectricalResistance": 1.8331617554858934,
-            "resThermalResistance": 2.6817693200860284
-        },
-        {
-            "name": "prototyp-vergleich",
-            "thermalStructure": [
-                {
-                    "material": "PMMA",
-                    "area": 20,
-                    "thickness": 1,
-                    "thermalConductivity": 0.19 
-                },
-                {
-                    "material": "Cu",
-                    "area": 12,
-                    "thickness": 0.4,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "BiTe",
-                    "area": 7.84,
-                    "thickness": 1.2,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "BiTe",
-                    "area": 7.84,
-                    "thickness": 1.2,
-                    "thermalConductivity": 1.2
-                },
-                {
-                    "material": "Cu",
-                    "area": 12,
-                    "thickness": 0.4,
-                    "thermalConductivity": 401
-                },
-                {
-                    "material": "PMMA",
-                    "area": 20,
-                    "thickness": 1,
-                    "thermalConductivity": 0.19 
-                }
-            ],
-            "electricalStructure": [
-                {
-                    "material": "Cu",
-                    "crossSection": 0.6,
-                    "length": 1.3,
-                    "specElConductivity": 5.8e5 
-                },
-                {
-                    "material": "BiTe",
-                    "crossSection": 1.96,
-                    "length": 1.15,
-                    "specElConductivity": 500
-                }
-            ],
-            "numberOfElectricalRepetitions": 8,
-            "combinedSeebeckCoefficient": 500,
-            "resElectricalResistance": 1.8331617554858934,
-            "resThermalResistance": 2.6817693200860284
+            "resElectricalResistance": 1.4832783251231527,
+            "resThermalResistance": 2.072258276940195
         },
         {
             "name": "prototyp",
@@ -119,7 +60,7 @@
                     "material": "PMMA",
                     "area": 20,
                     "thickness": 1,
-                    "thermalConductivity": 0.19 
+                    "thermalConductivity": 0.19
                 },
                 {
                     "material": "Cu",
@@ -134,10 +75,10 @@
                     "thermalConductivity": 1.2
                 },
                 {
-                    "material": "PEDOT",
-                    "area": 0.24,
+                    "material": "PEDOT-Paper-PMMA parallel",
+                    "area": 15.4,
                     "thickness": 1.2,
-                    "thermalConductivity": 1.0
+                    "thermalConductivity": 0.192
                 },
                 {
                     "material": "BiTe",
@@ -155,7 +96,7 @@
                     "material": "PMMA",
                     "area": 20,
                     "thickness": 1,
-                    "thermalConductivity": 0.19 
+                    "thermalConductivity": 0.19
                 }
             ],
             "electricalStructure": [
@@ -163,7 +104,72 @@
                     "material": "Cu",
                     "crossSection": 0.6,
                     "length": 1.3,
-                    "specElConductivity": 5.8e5 
+                    "specElConductivity": 580000.0
+                },
+                {
+                    "material": "BiTe",
+                    "crossSection": 1.96,
+                    "length": 1.15,
+                    "specElConductivity": 500
+                },
+                {
+                    "material": "PEDOT",
+                    "crossSection": 0.07,
+                    "length": 1.15,
+                    "specElConductivity": 225
+                }
+            ],
+            "numberOfElectricalRepetitions": 8,
+            "combinedSeebeckCoefficient": 500,
+            "resElectricalResistance": 2.7227478301665493,
+            "resThermalResistance": 1187.4282371732354
+        },
+        {
+            "name": "prototyp-vergleich",
+            "thermalStructure": [
+                {
+                    "material": "PMMA",
+                    "area": 20,
+                    "thickness": 1,
+                    "thermalConductivity": 0.19
+                },
+                {
+                    "material": "Cu",
+                    "area": 12,
+                    "thickness": 0.4,
+                    "thermalConductivity": 401
+                },
+                {
+                    "material": "BiTe",
+                    "area": 7.84,
+                    "thickness": 1.2,
+                    "thermalConductivity": 1.2
+                },
+                {
+                    "material": "BiTe",
+                    "area": 7.84,
+                    "thickness": 1.2,
+                    "thermalConductivity": 1.2
+                },
+                {
+                    "material": "Cu",
+                    "area": 12,
+                    "thickness": 0.4,
+                    "thermalConductivity": 401
+                },
+                {
+                    "material": "PMMA",
+                    "area": 20,
+                    "thickness": 1,
+                    "thermalConductivity": 0.19
+                }
+            ],
+            "electricalStructure": [
+                {
+                    "material": "Cu",
+                    "crossSection": 0.6,
+                    "length": 1.3,
+                    "specElConductivity": 580000.0
                 },
                 {
                     "material": "BiTe",
@@ -174,9 +180,8 @@
             ],
             "numberOfElectricalRepetitions": 8,
             "combinedSeebeckCoefficient": 500,
-            "resElectricalResistance": 1.8331617554858934,
-            "resThermalResistance": 2.6817693200860284
+            "resElectricalResistance": 0.0941764015951208,
+            "resThermalResistance": 781.5840813290797
         }
- 
     ]
 }
