@@ -61,7 +61,7 @@ class TabElectrical(QWidget):
         self.inSeebeckCoeff = QLineEdit()
         self.displaySeebeckCoeff(self.currentLayoutIndex)
 
-        self.repLayout.addWidget(QLabel("Number of Repititions: "))
+        self.repLayout.addWidget(QLabel("Number of Repititions/ Thermocouples: "))
         self.repLayout.addWidget(self.inNumReps)
         self.repLayout.addWidget(QLabel("Combined Seebeck Coefficient: (µV/K)"))
         self.repLayout.addWidget(self.inSeebeckCoeff)

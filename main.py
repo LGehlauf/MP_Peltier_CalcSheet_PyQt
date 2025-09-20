@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
 
         self.tabElectrical.setTable(layoutIndex)
         self.tabElectrical.displayNumReps(layoutIndex)
+        self.tabElectrical.displaySeebeckCoeff(self.currentLayoutIndex)
         self.tabElectrical.setOutput(layoutIndex)
 
     def activateTab(self, tabIndex):
@@ -77,6 +78,7 @@ class MainWindow(QMainWindow):
         elif tabIndex == 2:
             self.tabElectrical.setTable(self.currentLayoutIndex)
             self.tabElectrical.displayNumReps(self.currentLayoutIndex)
+            self.tabElectrical.displaySeebeckCoeff(self.currentLayoutIndex)
             self.tabElectrical.setOutput(self.currentLayoutIndex)
 
     def readCache(self):
