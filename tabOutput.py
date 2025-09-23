@@ -30,6 +30,48 @@ class TabOutput(QWidget):
         self.copPlot = PlotCanvas(parent=self)
         self.copPlot.setStyleSheet("background: transparent;")
 
+        ### y-lims 
+        self.inPlot_I_P_ylim_L = QLineEdit()
+        self.inPlot_I_P_ylim_U = QLineEdit()
+        self.inPlot_I_COP_ylim_L = QLineEdit()
+        self.inPlot_I_COP_ylim_U = QLineEdit()
+
+        self.inPlot_I_P_ylim_L.setPlaceholderText("auto")
+        self.inPlot_I_P_ylim_U.setPlaceholderText("auto")
+        self.inPlot_I_COP_ylim_L.setPlaceholderText("0")
+        self.inPlot_I_COP_ylim_U.setPlaceholderText("20")
+
+        mplLimQLabels = QHBoxLayout()
+        mplLimQLabels.addWidget(QLabel("Heatflux Min W"))
+        mplLimQLabels.addWidget(QLabel("Heatflux Max W"))
+        mplLimQLabels.addWidget(QLabel("COP Min"))
+        mplLimQLabels.addWidget(QLabel("COP Max"))
+        mplYLimQLineEdits = QHBoxLayout()
+        mplYLimQLineEdits.addWidget(self.inPlot_I_P_ylim_L)
+        mplYLimQLineEdits.addWidget(self.inPlot_I_P_ylim_U)
+        mplYLimQLineEdits.addWidget(self.inPlot_I_COP_ylim_L)
+        mplYLimQLineEdits.addWidget(self.inPlot_I_COP_ylim_U)
+        mplYLimLayout = QVBoxLayout()
+        mplYLimLayout.addLayout(mplLimQLabels)
+        mplYLimLayout.addLayout(mplYLimQLineEdits)
+
+        ### x-lims
+        self.inPlot_xlim_L = QLineEdit()
+        self.inPlot_xlim_U = QLineEdit()
+
+        self.inPlot_xlim_L.setPlaceholderText("0")
+        self.inPlot_xlim_U.setPlaceholderText("6")
+
+        mplXLimQLabels = QHBoxLayout()
+        mplXLimQLabels.addWidget(QLabel("Min I"))
+        mplXLimQLabels.addWidget(QLabel("Max I"))
+        mplXLimQLineEdits = QHBoxLayout()
+        mplXLimQLineEdits.addWidget(self.inPlot_xlim_L)
+        mplXLimQLineEdits.addWidget(self.inPlot_xlim_U)
+        mplXLimLayout = QVBoxLayout()
+        mplXLimLayout.addLayout(mplXLimQLabels)
+        mplXLimLayout.addLayout(mplXLimQLineEdits)
+
         ### checkboxes delta T
         deltaTLayoutContainer = QWidget()
         deltaTLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -47,7 +89,7 @@ class TabOutput(QWidget):
             checkBoxTempDiff = QCheckBox(f"{tempDiff} K")
             deltaTLayout.addWidget(checkBoxTempDiff)
             self.checkBoxesTempDiff.append(checkBoxTempDiff)
-        deltaTLayout.addWidget(self.toggleButtonHeatfluxComponents)
+        # deltaTLayout.addWidget(self.toggleButtonHeatfluxComponents)
         deltaTLayout.addStretch()
 
         ### slider electrical and thermal resistance
@@ -140,11 +182,15 @@ class TabOutput(QWidget):
         mplPlotsLayoutContainer = QWidget()
         mplPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         mplPlotsLayout = QHBoxLayout(mplPlotsLayoutContainer)
+        mplPlotsLayout.addWidget(self.toggleButtonHeatfluxComponents)
         mplPlotsLayout.addWidget(self.hfPlot)
         mplPlotsLayout.addWidget(self.copPlot)
         mplPlotsAndDTLayout = QVBoxLayout()
         mplPlotsAndDTLayout.addWidget(deltaTLayoutContainer)
         mplPlotsAndDTLayout.addWidget(mplPlotsLayoutContainer)
+        mplPlotsAndDTLayout.addWidget(QLabel("Plot Limit Setters:"))
+        mplPlotsAndDTLayout.addLayout(mplYLimLayout)
+        mplPlotsAndDTLayout.addLayout(mplXLimLayout)
         boxesAndPlotsLayout.addLayout(mplPlotsAndDTLayout)
         boxesAndPlotsLayout.addLayout(sankeyLayout)
         boxesAndPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -159,9 +205,15 @@ class TabOutput(QWidget):
         self.sankeyMaxPowButton.toggled.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.sliderElRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.sliderThermRes.valueChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_I_P_ylim_L.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_I_P_ylim_U.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_I_COP_ylim_L.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_I_COP_ylim_U.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_xlim_L.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
+        self.inPlot_xlim_U.textChanged.connect(lambda _: self.createPlots(self.currentLayoutIndex))
         self.checkBoxesTempDiff[1].setChecked(True)
     
-    def createPlots(self, layoutIndex):
+    def createPlots(self, layoutIndex, ylim_l=None, ylim_u=None, xlim_l=None, xlim_u=None):
         self.currentLayoutIndex = layoutIndex
         tempDiffs = []
         for i, box in enumerate(self.checkBoxesTempDiff):
@@ -175,8 +227,9 @@ class TabOutput(QWidget):
         showComponents = self.toggleButtonHeatfluxComponents.isChecked()
 
         heatfluxiDict = self.calcHeatfluxi(self.currentLayoutIndex, tempDiffs, elResFactor, thermResFactor)
-        self.hfPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents)
-        self.copPlot.plot_I_COP(heatfluxiDict, tempDiffs)
+
+        self.hfPlot.plot_I_P(heatfluxiDict, tempDiffs, showComponents, self.inPlot_I_P_ylim_L.text(), self.inPlot_I_P_ylim_U.text(), self.inPlot_xlim_L.text(), self.inPlot_xlim_U.text())
+        self.copPlot.plot_I_COP(heatfluxiDict, tempDiffs, self.inPlot_I_COP_ylim_L.text(), self.inPlot_I_COP_ylim_U.text(), self.inPlot_xlim_L.text(), self.inPlot_xlim_U.text())
         sankeyDict = self.calcSankeyDict(heatfluxiDict, tempDiffs, maxPowerBool)
         self.drawSankeySvg(layoutIndex, sankeyDict)
 

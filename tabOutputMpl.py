@@ -2,6 +2,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib as mpl
 
+def is_float(val):
+    try:
+        float(val)
+        return True
+    except (TypeError, ValueError):
+        return False
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -19,7 +25,7 @@ class PlotCanvas(FigureCanvas):
         for spine in self.ax.spines.values():
             spine.set_color("gray")
 
-    def plot_I_P(self, heatfluxi, dTs, showComponents):
+    def plot_I_P(self, heatfluxi, dTs, showComponents, ylim_l=None, ylim_u=None, xlim_l=None, xlim_u=None):
         self.ax.clear()
         I = heatfluxi['I']
         P_Ress = heatfluxi['P_Results']
@@ -75,23 +81,37 @@ class PlotCanvas(FigureCanvas):
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("P [W]")
         self.ax.grid()
+        if all(is_float(lim) for lim in [ylim_l, ylim_u]) and ylim_l != ylim_u:
+            ylim_l = float(ylim_l); ylim_u = float(ylim_u)
+            self.ax.set_ylim(ylim_l, ylim_u)
+        if all(is_float(lim) for lim in [xlim_l, xlim_u]) and xlim_l != xlim_u:
+            xlim_l = float(xlim_l); xlim_u = float(xlim_u)
+            self.ax.set_xlim(xlim_l, xlim_u)
         self.ax.set_title("Heatfluxes")
         self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
 
         self.draw()
 
-    def plot_I_COP(self, heatfluxi, dTs):
+    def plot_I_COP(self, heatfluxi, dTs, ylim_l=None, ylim_u=None, xlim_l=None, xlim_u=None):
         self.ax.clear()
         # cop = []
         linetypes = ['-', '--', ':', '-.']
         for i, res in enumerate(heatfluxi['COPs']):
             # cop.append(res/ -heatfluxi['P_Joule'])
             self.ax.plot(heatfluxi['I'], heatfluxi['COPs'][i], label=f"$\Delta$T={dTs[i]} K", c='white', lw=1.5, ls=linetypes[i])
+            
+        if all(is_float(lim) for lim in [ylim_l, ylim_u]) and ylim_l != ylim_u:
+            ylim_l = float(ylim_l); ylim_u = float(ylim_u)
+            self.ax.set_ylim(ylim_l, ylim_u)
+        else:
+            self.ax.set_ylim(0, 20)
+        if all(is_float(lim) for lim in [xlim_l, xlim_u]) and xlim_l != xlim_u:
+            xlim_l = float(xlim_l); xlim_u = float(xlim_u)
+            self.ax.set_xlim(xlim_l, xlim_u)
 
         self.ax.set_xlabel("I [A]")
         self.ax.set_ylabel("COP")
         self.ax.grid()
-        self.ax.set_ylim(0, 20)
         self.ax.set_title("Coefficient of Performance (COP)")
         self.ax.legend(facecolor = (0.1, 0.1, 0.1, 1))
         self.draw()
