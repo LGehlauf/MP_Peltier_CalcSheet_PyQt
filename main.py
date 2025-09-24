@@ -13,12 +13,14 @@ import json
 import tempfile
 import os
 
+# from PyQt6.QtGui import QPixmap
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.currentLayoutIndex = 0
         self.cache = self.readCache()
-        self.setWindowTitle("MyApp")
+        self.setWindowTitle("Thermoelectric Calculator")
         # self.setFixedSize(QSize(400, 300))
 
         centralWidget = QWidget()
@@ -47,6 +49,7 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.tabOutput, "Output")
         tabs.addTab(self.tabThermal, "Thermal Structure")
         tabs.addTab(self.tabElectrical, "Electrical Structure")
+        tabs.setCurrentIndex(0)
         tabs.currentChanged.connect(self.activateTab)
         self.layoutChoiceDropdown.activated.connect(self.setCurrentLayoutIndexUpdateTabs)
 
@@ -105,4 +108,9 @@ class MainWindow(QMainWindow):
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
+
+# pixmap = window.grab()
+# scaled = pixmap.scaled(16800, 10000)
+# scaled.save("electrical.png")
+
 app.exec()
