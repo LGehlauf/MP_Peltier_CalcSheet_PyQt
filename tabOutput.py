@@ -24,6 +24,7 @@ class TabOutput(QWidget):
     drawSankeySvg = drawSankeySvg
     
     def init(self):
+        self.setStyleSheet("QLineEdit { color: white; }")
         self.tempDiffs = [0, 10, 30, 60]
         self.hfPlot = PlotCanvas(parent=self)
         self.hfPlot.setStyleSheet("background: transparent;")
@@ -42,8 +43,8 @@ class TabOutput(QWidget):
         self.inPlot_I_COP_ylim_U.setPlaceholderText("20")
 
         mplLimQLabels = QHBoxLayout()
-        mplLimQLabels.addWidget(QLabel("Heatflux Min W"))
-        mplLimQLabels.addWidget(QLabel("Heatflux Max W"))
+        mplLimQLabels.addWidget(QLabel("Heatflux Min [W]"))
+        mplLimQLabels.addWidget(QLabel("Heatflux Max [W]"))
         mplLimQLabels.addWidget(QLabel("COP Min"))
         mplLimQLabels.addWidget(QLabel("COP Max"))
         mplYLimQLineEdits = QHBoxLayout()
@@ -63,8 +64,8 @@ class TabOutput(QWidget):
         self.inPlot_xlim_U.setPlaceholderText("6")
 
         mplXLimQLabels = QHBoxLayout()
-        mplXLimQLabels.addWidget(QLabel("Min I"))
-        mplXLimQLabels.addWidget(QLabel("Max I"))
+        mplXLimQLabels.addWidget(QLabel("Min I [A]"))
+        mplXLimQLabels.addWidget(QLabel("Max I [A]"))
         mplXLimQLineEdits = QHBoxLayout()
         mplXLimQLineEdits.addWidget(self.inPlot_xlim_L)
         mplXLimQLineEdits.addWidget(self.inPlot_xlim_U)
