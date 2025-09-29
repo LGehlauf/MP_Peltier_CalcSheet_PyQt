@@ -382,7 +382,7 @@
             "resThermalResistance": 1389.6720191699715
         },
         {
-            "name": "prototyp-vergleich",
+            "name": "prototyp-comparison",
             "thermalStructure": [
                 {
                     "material": "PMMA",
