@@ -2,7 +2,7 @@
 
 This is a simple program to build thermoelectric coolers layer by layer and visualize the heat fluxes.
 
-![Screenshot](assets/Screenshot.png)
+![Screenshot](assets/output_whole.webp)
 
 To build and compile it, download the repository, unzip it and do the following steps:
 
