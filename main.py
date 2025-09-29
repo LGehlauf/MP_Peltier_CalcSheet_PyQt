@@ -13,7 +13,7 @@ import json
 import tempfile
 import os
 
-# from PyQt6.QtGui import QPixmap
+# from PyQt6.QtGui import QPixmap # for making HQ screenshots
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -55,7 +55,6 @@ class MainWindow(QMainWindow):
 
         mainLayout.addLayout(layoutChoice)
         mainLayout.addWidget(tabs)
-        # self.setCentralWidget(self.layoutChoice)
 
     def setCurrentLayoutIndexUpdateTabs(self, layoutIndex):
         self.currentLayoutIndex = layoutIndex
@@ -109,8 +108,8 @@ app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
 
-# pixmap = window.grab()
+# pixmap = window.grab() # for making HQ screenshots
 # scaled = pixmap.scaled(16800, 10000)
-# scaled.save("electrical.png")
+# scaled.save("output.png")
 
 app.exec()

@@ -81,6 +81,7 @@ class TabOutput(QWidget):
 
         self.toggleButtonHeatfluxComponents = QPushButton("Toggle\nComponents")
         self.toggleButtonHeatfluxComponents.setCheckable(True)
+        self.toggleButtonHeatfluxComponents.setChecked(True)
         self.toggleButtonHeatfluxComponents.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         checkBoxTempDiffLabel = QLabel()
         checkBoxTempDiffLabel.setText("ΔT:")
