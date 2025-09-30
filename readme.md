@@ -1,6 +1,6 @@
 # Masterprojekt of Leonhard Gehlauf at HTWK Leipzig
 
-This is a simple program to build thermoelectric coolers layer by layer and visualize the heat fluxes.
+An app to build thermoelectric coolers layer by layer and visualize the heat fluxes.
 
 ![Screenshot](assets/output_whole.webp)
 
