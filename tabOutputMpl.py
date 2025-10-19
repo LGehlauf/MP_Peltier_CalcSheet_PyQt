@@ -18,10 +18,10 @@ class PlotCanvas(FigureCanvas):
         self.fig.patch.set_alpha(0.0)
         # self.fig.tight_layout()
         self.ax.set_facecolor((0.6, 0.6, 0.6, 1))
-        mpl.rcParams['text.color'] = "white"
-        mpl.rcParams['axes.labelcolor'] = "white"
-        mpl.rcParams['xtick.color'] = "white"
-        mpl.rcParams['ytick.color'] = "white"
+        # mpl.rcParams['text.color'] = "white"
+        # mpl.rcParams['axes.labelcolor'] = "white"
+        # mpl.rcParams['xtick.color'] = "white"
+        # mpl.rcParams['ytick.color'] = "white"
         for spine in self.ax.spines.values():
             spine.set_color("gray")
 
