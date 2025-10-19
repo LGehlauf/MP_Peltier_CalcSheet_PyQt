@@ -168,13 +168,17 @@ class TabOutput(QWidget):
         layoutName = self.cache['layouts'][self.currentLayoutIndex]['name']
         self.svg = QSvgWidget(f"assets/outputSankey_{layoutName}.svg")
         sankeyLayout.addWidget(self.svg)
-        bigLegendL = QLabel("ΔT...\nP_In\nP_S\nP_J\nP_HS...\nP_CS...\nP_Pe...\nP_λ...")
+
+        ### legend
+        bigLegendL = QLabel("ΔT...\n\nP_In\nP_S\nP_J\nP_HS...\nP_CS...\nP_Pe...\nP_λ...\n")
         bigLegendL.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nInput Power\nSeebeck Power\nJoule Heatflux\nHotside Heatflux\nColdside Heatflux\nPeltier Heatflux\nReturning Conductivity Heatflux")
+        # bigLegendR = QLabel("Temperature Difference between Hot- and Coldside\nInput Power\nSeebeck Power\nJoule Heatflux\nHotside Heatflux\nColdside Heatflux\nPeltier Heatflux\nReturning Conductivity Heatflux")
+        bigLegendR = QLabel("Temperature Difference\nbetween Hot- and Coldside\nInput Power\nSeebeck Power\nJoule Heatflux\nHotside Heatflux\nColdside Heatflux\nPeltier Heatflux\nReturning Conductivity\nHeatflux")
+        bigLegendR.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         bigLegendLayout = QHBoxLayout()
         bigLegendLayout.addWidget(bigLegendL)
         bigLegendLayout.addWidget(bigLegendR)
-        sankeyLayout.addLayout(bigLegendLayout)
+        # sankeyLayout.addLayout(bigLegendLayout)
 
 
         ### assembly
@@ -184,7 +188,12 @@ class TabOutput(QWidget):
         mplPlotsLayoutContainer = QWidget()
         mplPlotsLayoutContainer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         mplPlotsLayout = QHBoxLayout(mplPlotsLayoutContainer)
-        mplPlotsLayout.addWidget(self.toggleButtonHeatfluxComponents)
+
+        toggleComponentsAndLegendLayout = QVBoxLayout()
+        toggleComponentsAndLegendLayout.addWidget(self.toggleButtonHeatfluxComponents)
+        toggleComponentsAndLegendLayout.addLayout(bigLegendLayout)
+        
+        mplPlotsLayout.addLayout(toggleComponentsAndLegendLayout)
         mplPlotsLayout.addWidget(self.hfPlot)
         mplPlotsLayout.addWidget(self.copPlot)
         mplPlotsAndDTLayout = QVBoxLayout()
