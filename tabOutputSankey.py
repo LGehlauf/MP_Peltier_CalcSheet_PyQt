@@ -18,7 +18,7 @@ def drawSankeySvg(self, layoutIndex, sankeyDict):
 
     self.currentLayoutIndex = layoutIndex
     layoutName = self.cache['layouts'][layoutIndex]['name']
-    svgWidth, svgHeight = 500, 500
+    svgWidth, svgHeight = 350, 350
     bgWidth, bgHeight = 0.9 * svgWidth, 0.9 * svgHeight
     self.svg.setFixedSize(svgWidth, svgHeight)
     layerCols = [
